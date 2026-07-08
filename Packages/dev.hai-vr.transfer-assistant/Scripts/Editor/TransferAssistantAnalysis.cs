@@ -32,16 +32,40 @@ namespace Hai.TransferAssistant
                 return;
             }
 
-            _targets = targets.ToHashSet();
+            _targets = ExpandFolders(targets.ToHashSet());
             _excludedTypeNames = afterCullingTypeFullNames.ToHashSet();
             _includeEditorOnly = includeEditorOnly;
 
-            DiscoverPrefabInstances(targets);
-            DiscoverThroughTraversal(targets);
+            DiscoverPrefabInstances();
+            DiscoverThroughTraversal();
             UpdateCullingInternal();
         }
 
-        private void DiscoverThroughTraversal(List<Object> targets)
+        private HashSet<Object> ExpandFolders(HashSet<Object> targets)
+        {
+            var newTargets = new HashSet<Object>(targets);
+            
+            foreach (var target in targets)
+            {
+                if (target is DefaultAsset)
+                {
+                    var assetPath = AssetDatabase.GetAssetPath(target);
+                    var assetGuids = AssetDatabase.FindAssets("t:Object", new[] { assetPath });
+                    foreach (var assetGuid in assetGuids)
+                    {
+                        var asset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(assetGuid));
+                        if (asset != null)
+                        {
+                            newTargets.Add(asset);
+                        }
+                    }
+                }
+            }
+            
+            return newTargets.ToHashSet();
+        }
+
+        private void DiscoverThroughTraversal()
         {
             DataDeepviews = new Dictionary<Object, Deepview>();
             DataTypeCounts = new Dictionary<Type, int>();
@@ -49,7 +73,7 @@ namespace Hai.TransferAssistant
             var dataTraversalDependentToOrigins = new Dictionary<Object, List<TraversalLog>>();
             var traversalResults = new HashSet<Object>();
             
-            foreach (var target in targets)
+            foreach (var target in _targets)
             {
                 var results = DiscoverAssetsRequiredForEditing.FindAllAssetsAndComponents(target, new DiscoveryOptions
                 {
@@ -184,10 +208,10 @@ namespace Hai.TransferAssistant
             return false;
         }
 
-        private void DiscoverPrefabInstances(List<Object> targets)
+        private void DiscoverPrefabInstances()
         {
             DataPrefabObjectToInstances = new Dictionary<GameObject, HashSet<GameObject>>();
-            foreach (var target in targets)
+            foreach (var target in _targets)
             {
                 if (target is GameObject targetGo)
                 {
