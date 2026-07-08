@@ -168,7 +168,7 @@ namespace Hai.TransferAssistant
                 var typeName = asset.GetType();
                 
                 DataTypeCounts.TryAdd(typeName, 0);
-                if (DataDeepviews[asset].isMainAsset)
+                if (DataDeepviews.TryGetValue(asset, out var dv) && !dv.isBoring)
                 {
                     DataTypeCounts[typeName]++;
                 }
@@ -334,11 +334,11 @@ namespace Hai.TransferAssistant
                     isEditorOnly = current.isEditorOnly,
                 });
 
+                var ttype = asset.GetType();
+                AfterCullingTypeCounts.TryAdd(ttype, 0);
+                AfterCullingTypeCounts[ttype]++;
                 if (current.isMainAsset)
                 {
-                    var ttype = asset.GetType();
-                    AfterCullingTypeCounts.TryAdd(ttype, 0);
-                    AfterCullingTypeCounts[ttype]++;
                     TotalAfterCulling++;
                 }
             }
