@@ -298,20 +298,25 @@ namespace Hai.TransferAssistant
                 label += localize.Format(Phrases.culled_suffix, count - culledCount);
             }
 
-            if (EditorGUILayout.ToggleLeft(label, !isCulled))
+            EditorGUI.BeginChangeCheck();
+            var newState = EditorGUILayout.ToggleLeft(label, !isCulled);
+            if (EditorGUI.EndChangeCheck())
             {
-                if (_afterCullingTypeFullNames.Remove(ttype.FullName))
+                if (newState)
                 {
-                    _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
-                    SavePrefs();
+                    if (_afterCullingTypeFullNames.Remove(ttype.FullName))
+                    {
+                        _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
+                        SavePrefs();
+                    }
                 }
-            }
-            else
-            {
-                if (_afterCullingTypeFullNames.Add(ttype.FullName))
+                else
                 {
-                    _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
-                    SavePrefs();
+                    if (_afterCullingTypeFullNames.Add(ttype.FullName))
+                    {
+                        _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
+                        SavePrefs();
+                    }
                 }
             }
         }
