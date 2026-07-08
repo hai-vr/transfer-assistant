@@ -379,7 +379,7 @@ namespace Hai.TransferAssistant
 
             var isComponentOrStateMachineBehaviour = IsComponentOrStateMachineBehaviour(ttype);
             var label = isComponentOrStateMachineBehaviour ? friendlyTypeName : $"{friendlyTypeName} ({culledCount} / {count})";
-            if (culledCount < count && culledCount != 0)
+            if (!isComponentOrStateMachineBehaviour && culledCount < count && culledCount != 0)
             {
                 label += localize.Format(Phrases.culled_suffix, count - culledCount);
             }
