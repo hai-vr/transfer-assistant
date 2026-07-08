@@ -45,6 +45,16 @@ namespace Hai.TransferAssistant
         private readonly HashSet<Type> _foldoutTypeGroups = new();
         private readonly HashSet<Type> _foldoutDeepTraversalTypeGroups = new();
 
+        private List<Type> _cachedComponents = new();
+        private List<Type> _cachedNonComponents = new();
+        private List<ComponentGroup> _cachedComponentGroups = new();
+
+        private struct ComponentGroup
+        {
+            public string Key;
+            public List<Type> Types;
+        }
+
         private static HaiEFLoc localize
         {
             get
@@ -181,14 +191,12 @@ namespace Hai.TransferAssistant
                 
                 if (_analysis.DataSortedTypes != null)
                 {
-                    var (components, nonComponents) = PartitionBy(_analysis.DataSortedTypes, IsComponentOrStateMachineBehaviour);
-
                     localize.HelpBox(Phrases.msg_checkboxes_affect_export, MessageType.None);
                     
-                    if (nonComponents.Count > 0)
+                    if (_cachedNonComponents.Count > 0)
                     {
                         localize.LabelField(Phrases.culling, EditorStyles.boldLabel);
-                        foreach (var ttype in nonComponents)
+                        foreach (var ttype in _cachedNonComponents)
                         {
                             LayoutTypeToggle(ttype);
                         }
@@ -206,17 +214,58 @@ namespace Hai.TransferAssistant
                     }
                     EditorGUILayout.Space();
 
-                    if (components.Count > 0)
+                    if (_cachedComponents.Count > 0)
                     {
                         localize.LabelField(Phrases.components, EditorStyles.boldLabel);
-                        foreach (var ttype in components)
+
+                        foreach (var group in _cachedComponentGroups)
                         {
-                            LayoutTypeToggle(ttype);
+                            if (group.Key == "")
+                            {
+                                foreach (var ttype in group.Types)
+                                {
+                                    LayoutTypeToggle(ttype);
+                                }
+                            }
+                            else
+                            {
+                                var groupList = group.Types;
+                                var allIncluded = groupList.All(ttype => !_afterCullingTypeFullNames.Contains(ttype.FullName));
+                                var noneIncluded = groupList.All(ttype => _afterCullingTypeFullNames.Contains(ttype.FullName));
+
+                                EditorGUI.BeginChangeCheck();
+                                EditorGUI.showMixedValue = !allIncluded && !noneIncluded;
+                                var newState = EditorGUILayout.ToggleLeft(group.Key, allIncluded, EditorStyles.boldLabel);
+                                EditorGUI.showMixedValue = false;
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    foreach (var ttype in groupList)
+                                    {
+                                        if (newState)
+                                        {
+                                            _afterCullingTypeFullNames.Remove(ttype.FullName);
+                                        }
+                                        else
+                                        {
+                                            _afterCullingTypeFullNames.Add(ttype.FullName);
+                                        }
+                                    }
+                                    _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
+                                    SavePrefs();
+                                }
+
+                                EditorGUI.indentLevel++;
+                                foreach (var ttype in groupList)
+                                {
+                                    LayoutTypeToggle(ttype);
+                                }
+                                EditorGUI.indentLevel--;
+                            }
                         }
                         EditorGUILayout.Space();
                     }
 
-                    if (nonComponents.Count == 0)
+                    if (_cachedNonComponents.Count == 0)
                     {
                         LayoutResetToDefaults();
                     }
@@ -592,6 +641,7 @@ namespace Hai.TransferAssistant
                 try
                 {
                     _analysis.DoPerformAnalysis(_multiTargets ? targets.Where(o => o != null).Distinct().ToList() : new List<Object> { target }, _afterCullingTypeFullNames, _includeEditorOnly);
+                    RefreshCachedTypes();
                 }
                 catch (Exception e)
                 {
@@ -604,6 +654,39 @@ namespace Hai.TransferAssistant
                     Repaint();
                 }
             };
+        }
+
+        private void RefreshCachedTypes()
+        {
+            if (_analysis.DataSortedTypes == null)
+            {
+                _cachedComponents = new List<Type>();
+                _cachedNonComponents = new List<Type>();
+                _cachedComponentGroups = new List<ComponentGroup>();
+                return;
+            }
+
+            (_cachedComponents, _cachedNonComponents) = PartitionBy(_analysis.DataSortedTypes, IsComponentOrStateMachineBehaviour);
+            _cachedComponentGroups = _cachedComponents
+                .GroupBy(ttype =>
+                {
+                    var typeName = ttype.Name;
+                    for (var i = typeName.Length - 1; i >= 3; i--)
+                    {
+                        if (char.IsUpper(typeName[i]))
+                        {
+                            var prefix = typeName.Substring(0, i);
+                            if (_cachedComponents.Count(t => t.Name.StartsWith(prefix)) >= 5)
+                            {
+                                return prefix;
+                            }
+                        }
+                    }
+                    return "";
+                })
+                .OrderBy(g => g.Key, StringComparer.InvariantCulture)
+                .Select(g => new ComponentGroup { Key = g.Key, Types = g.ToList() })
+                .ToList();
         }
 
         private static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)
