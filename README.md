@@ -4,6 +4,8 @@ Transfer Assistant
 This Unity tool will assist you when you want to use the *Export .unitypackage* function to **transfer assets from one project
 to another project**, while stripping assets that you deem unnecessary.
 
+![general.png](Documentation/general.png)
+
 Rather than including all referenced assets, it will deliberately ignore some of them:
 
 - Instead of exporting every asset referenced by prefabs, it only exports assets that exist on the main avatar.
@@ -13,6 +15,8 @@ Rather than including all referenced assets, it will deliberately ignore some of
 - You may choose to ignore assets referenced by objects marked as EditorOnly.
 
 If a suspicious asset is being included in the export, and you are not sure why that's the case, the *Transfer Assistant* user interface can help you locate which object or component depends on it.
+
+![dependency_reason.png](Documentation/dependency_reason.png)
 
 *Transfer Assistant* will never modify the contents of Scenes or Prefabs.
 
