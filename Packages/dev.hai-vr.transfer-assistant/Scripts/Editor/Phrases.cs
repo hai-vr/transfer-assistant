@@ -7,7 +7,6 @@ namespace Hai.TransferAssistant
         public const string culled_suffix = nameof(culled_suffix);
         public const string msg_checkboxes_affect_export = nameof(msg_checkboxes_affect_export);
         public const string culling = nameof(culling);
-        public const string deep_dependencies = nameof(deep_dependencies);
         public const string dependencies = nameof(dependencies);
         public const string depends_on = nameof(depends_on);
         public const string exploration = nameof(exploration);

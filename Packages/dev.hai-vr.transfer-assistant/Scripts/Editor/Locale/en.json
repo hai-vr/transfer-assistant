@@ -11,7 +11,6 @@
             "culled_suffix": " ({0} culled)",
             "msg_checkboxes_affect_export": "These checkboxes below will affect which assets are exported.",
             "culling": "Culling",
-            "deep_dependencies": "Deep Dependencies",
             "dependencies": "Dependencies",
             "depends_on": "Depends on",
             "exploration": "Exploration",

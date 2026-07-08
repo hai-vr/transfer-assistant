@@ -247,16 +247,15 @@ namespace Hai.TransferAssistant
 
             if (_analysis.DataPrefabObjectToInstances != null)
             {
-                _tabIndex = GUILayout.Toolbar(_tabIndex, new[] { localize.Text(Phrases.dependencies), localize.Text(Phrases.deep_dependencies), localize.Text(Phrases.prefabs), localize.Text(Phrases.types) });
+                _tabIndex = GUILayout.Toolbar(_tabIndex, new[] { localize.Text(Phrases.dependencies), localize.Text(Phrases.prefabs), localize.Text(Phrases.types) });
 
                 _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
                 switch (_tabIndex)
                 {
-                    case 0: LayoutVisualizeTraversal(); break;
-                    case 1: LayoutVisualizeDeepTraversal(); break;
-                    case 2: LayoutVisualizePrefabs(); break;
-                    case 3: LayoutVisualizeTypes(); break;
+                    case 0: LayoutVisualizeDeepTraversal(); break;
+                    case 1: LayoutVisualizePrefabs(); break;
+                    case 2: LayoutVisualizeTypes(); break;
                 }
 
                 EditorGUILayout.EndScrollView();
@@ -405,10 +404,6 @@ namespace Hai.TransferAssistant
             }
         }
 
-        private void LayoutVisualizeTraversal()
-        {
-        }
-
         private void LayoutVisualizeDeepTraversal()
         {
             DisplayHideItemsFilter();
@@ -545,7 +540,7 @@ namespace Hai.TransferAssistant
             EditorGUILayout.EndVertical();
         }
 
-        public void ScheduleAnalysis()
+        private void ScheduleAnalysis()
         {
             if (_analysisScheduled) return;
             _analysisScheduled = true;
@@ -569,7 +564,7 @@ namespace Hai.TransferAssistant
             };
         }
 
-        public static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)
+        private static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)
         {
             ColoredBackground(isActive, bgColor, () =>
             {

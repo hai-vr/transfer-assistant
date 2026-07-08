@@ -50,7 +50,19 @@ This tool attempts to facilitate the transfer of an avatar between incompatible 
 
 Transfer Assistant does not modify the contents of scenes or prefabs in any way.
 
-## Options
+## Reference manual
+
+### Open the Transfer Assistant window
+
+In the *Project* tab, right-click a prefab or scene and choose *Transfer Assistant...*
+
+Alternatively, you can go to *Window > Haï~ > Transfer Assistant*, then choose a prefab, and click the *Perform analysis* button.
+
+### Transfer Assistant window
+
+Press the checkboxes in the sidebar on the left to affect which assets will get exported.
+
+These checkboxes have a cascading effect; unchecking Materials will affect which Textures get exported.
 
 - **Culling** checkboxes:
   - When checking an asset type, those asset types are included, and any other asset referenced by those asset types is discovered and traversed.
@@ -65,7 +77,21 @@ Transfer Assistant does not modify the contents of scenes or prefabs in any way.
   - When unchecking a component, assets referenced by those components are not discovered.
   - *This does not remove the Components from the prefab. Transfer Assistant never modifies prefabs nor scenes.*
 
-### Difference between Culling and Filtering
+### Prepare Export window
+
+In the sidebar, press the *Prepare Export...* button. This will open a new window which looks similar to the *Export .unitypackage* window.
+
+In there, you can inspect which files would be exported and refine your selection.
+
+The sidebar of that window has buttons for each asset type. These do not have a cascading effect.
+- **Select**: Selects the assets of this type, which will include them in the export.
+- **Deselect**: Deselects the assets of this type, which will exclude them from the export.
+- **Hide**: Deselects the assets of this type and removes them from the Export window.
+  - *Note: Pressing Hide will **not** deselect the assets that are referenced by those assets, so this is different from the Culling option. Read more about this in the next section below.*
+
+Press the *Export Selected* button to export the selected assets.
+
+#### Difference between Culling and Filtering
 
 You will notice there are two systems that will help narrow down which assets are exported: Culling, and Filtering.
 
