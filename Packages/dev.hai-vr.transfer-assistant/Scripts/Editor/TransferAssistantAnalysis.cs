@@ -5,9 +5,9 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
-    internal class UnitypackageTransferAnalysis
+    internal class TransferAssistantAnalysis
     {
         internal const string UnknownAssetAndDLLTypeName = "DefaultAsset";
         

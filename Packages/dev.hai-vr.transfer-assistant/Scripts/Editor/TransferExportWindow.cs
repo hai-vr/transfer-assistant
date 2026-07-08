@@ -6,9 +6,9 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
-    public class UnitypackageTransferExportWindow : EditorWindow
+    public class TransferExportWindow : EditorWindow
     {
         private const string DefaultExportFileName = "export.unitypackage";
         
@@ -21,7 +21,7 @@ namespace Hai.UnitypackageTransferAssistant
             }
         }
         private static HaiEFLoc _localize;
-        private static HaiEFLoc NewLoc() => new("dev.hai-vr.unitypackage-transfer-assistant", "Packages/dev.hai-vr.unitypackage-transfer-assistant/Scripts/Editor/Locale");
+        private static HaiEFLoc NewLoc() => new("dev.hai-vr.transfer-assistant", "Packages/dev.hai-vr.transfer-assistant/Scripts/Editor/Locale");
 
         private TreeViewState _treeViewState;
         private HaiAssetTreeView _treeView;
@@ -30,7 +30,7 @@ namespace Hai.UnitypackageTransferAssistant
 
         public static void ShowWindow(string[] assetPaths, List<Object> assetsByTraversal)
         {
-            var window = GetWindow<UnitypackageTransferExportWindow>(localize.Text(Phrases.window_title));
+            var window = GetWindow<TransferExportWindow>(localize.Text(Phrases.window_title));
             window._assetPaths = assetPaths;
             window._assetsByTraversal = assetsByTraversal.Select(AssetDatabase.GetAssetPath).ToList();
             window.Initialize();
@@ -238,7 +238,7 @@ namespace Hai.UnitypackageTransferAssistant
 
             if (allItems.Count == 0)
             {
-                var noItems = new TreeViewItem { id = -1, displayName = UnitypackageTransferExportWindow.localize.Text(Phrases.no_items_to_show) };
+                var noItems = new TreeViewItem { id = -1, displayName = TransferExportWindow.localize.Text(Phrases.no_items_to_show) };
                 root.AddChild(noItems);
             }
 

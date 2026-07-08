@@ -1,7 +1,7 @@
-.unitypackage Transfer Assistant
+Transfer Assistant
 =====
 
-This tool will assist you when you want to use the *Export .unitypackage* function of Unity to **transfer assets from one project
+This Unity tool will assist you when you want to use the *Export .unitypackage* function to **transfer assets from one project
 to another project**, while stripping assets that you deem unnecessary.
 
 - Instead of exporting every asset referenced by prefabs, it only exports assets that exist on the main avatar.
@@ -22,7 +22,7 @@ That said, this tool may still be used to transfer avatars or other asset types 
 ### What this tool is NOT designed for
 
 This tool is **not** designed for exporting .unitypackage files meant to be published and distributed as part of a release, as such assets typically need more rigorous discipline in the folder structure.
-Some functionality of this tool may be used for introspection purposes, but it is **not recommended to use this tool for the management of product releases**.
+Some functionality of this tool may be used for introspection purposes, but it is **not recommended** to use this tool for the management of product releases.
 
 ## The problem this tries to solve
 

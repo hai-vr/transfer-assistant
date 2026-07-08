@@ -5,11 +5,11 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
-    public class UnitypackageTransferAssistantWindow : EditorWindow
+    public class TransferAssistantWindow : EditorWindow
     {
-        private const string PrefsPrefix = "Hai.UnitypackageTransferAssistant.";
+        private const string PrefsPrefix = "Hai.TransferAssistant.";
         private const string AfterCullingTypeFullNamesPrefsKey = PrefsPrefix + "AfterCullingTypeFullNames";
         private const string HideItemsFilterPrefsKey = PrefsPrefix + "HideItemsFilter";
         private const string IncludeEditorOnlyPrefsKey = PrefsPrefix + "IncludeEditorOnly";
@@ -35,7 +35,7 @@ namespace Hai.UnitypackageTransferAssistant
         private int _tabIndex;
 
         private bool _analysisScheduled;
-        private UnitypackageTransferAnalysis _analysis;
+        private TransferAssistantAnalysis _analysis;
         
         private Vector2 _scrollPos;
         private Vector2 _sidebarScrollPos;
@@ -51,11 +51,11 @@ namespace Hai.UnitypackageTransferAssistant
             }
         }
         private static HaiEFLoc _localize;
-        private static HaiEFLoc NewLoc() => new("dev.hai-vr.unitypackage-transfer-assistant", "Packages/dev.hai-vr.unitypackage-transfer-assistant/Scripts/Editor/Locale");
+        private static HaiEFLoc NewLoc() => new("dev.hai-vr.transfer-assistant", "Packages/dev.hai-vr.transfer-assistant/Scripts/Editor/Locale");
 
         private void OnEnable()
         {
-            _analysis = new UnitypackageTransferAnalysis();
+            _analysis = new TransferAssistantAnalysis();
             if (EditorPrefs.HasKey(HideItemsFilterPrefsKey))
             {
                 _hideItemsFilter = (HideItemsFilter)EditorPrefs.GetInt(HideItemsFilterPrefsKey);
@@ -83,15 +83,15 @@ namespace Hai.UnitypackageTransferAssistant
         [MenuItem("Assets/Transfer Assistant...")]
         public static void AnalyzeSelection()
         {
-            var window = GetWindow<UnitypackageTransferAssistantWindow>(ShortTitleName);
+            var window = GetWindow<TransferAssistantWindow>(ShortTitleName);
             window.target = Selection.activeObject;
             window.ScheduleAnalysis();
         }
 
-        [MenuItem("Window/Haï/.unitypackage Transfer Assistant")]
+        [MenuItem("Window/Haï/Transfer Assistant")]
         public static void ShowWindow()
         {
-            GetWindow<UnitypackageTransferAssistantWindow>(ShortTitleName);
+            GetWindow<TransferAssistantWindow>(ShortTitleName);
         }
 
         private void OnGUI()
@@ -131,7 +131,7 @@ namespace Hai.UnitypackageTransferAssistant
                         .Distinct()
                         .ToArray();
 
-                    UnitypackageTransferExportWindow.ShowWindow(allRelevantAssets, _analysis.AfterCullingDataDeepviews.Keys.ToList());
+                    TransferExportWindow.ShowWindow(allRelevantAssets, _analysis.AfterCullingDataDeepviews.Keys.ToList());
                 }
 
                 if (target != null && !_analysis.IsTargetAnAsset)
@@ -290,7 +290,7 @@ namespace Hai.UnitypackageTransferAssistant
             var count = _analysis.DataTypeCounts[ttype];
             var culledCount = _analysis.AfterCullingTypeCounts != null && _analysis.AfterCullingTypeCounts.TryGetValue(ttype, out var c) ? c : 0;
             var isCulled = _afterCullingTypeFullNames.Contains(ttype.FullName);
-            var friendlyTypeName = ttype.Name == UnitypackageTransferAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : ttype.Name;
+            var friendlyTypeName = ttype.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : ttype.Name;
 
             var isComponentOrStateMachineBehaviour = IsComponentOrStateMachineBehaviour(ttype);
             var label = isComponentOrStateMachineBehaviour ? friendlyTypeName : $"{friendlyTypeName} ({culledCount} / {count})";
@@ -382,7 +382,7 @@ namespace Hai.UnitypackageTransferAssistant
 
                 foreach (var group in typeGroups)
                 {
-                    var friendlyTypeName = group.TType.Name == UnitypackageTransferAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
+                    var friendlyTypeName = group.TType.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
                     var isFoldedOut = _foldoutTypeGroups.Contains(group.TType);
                     
                     EditorGUILayout.BeginVertical("GroupBox");
@@ -452,7 +452,7 @@ namespace Hai.UnitypackageTransferAssistant
 
                 foreach (var group in typeGroups)
                 {
-                    var friendlyTypeName = group.TType.Name == UnitypackageTransferAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
+                    var friendlyTypeName = group.TType.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
                     var isFoldedOut = _foldoutDeepTraversalTypeGroups.Contains(group.TType);
 
                     EditorGUILayout.BeginVertical("GroupBox");

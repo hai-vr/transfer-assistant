@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
     internal class Phrases
     {

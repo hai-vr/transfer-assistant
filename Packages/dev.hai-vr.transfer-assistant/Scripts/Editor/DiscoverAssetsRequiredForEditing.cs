@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Object = UnityEngine.Object;
 
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
     internal class DiscoveryOptions
     {
@@ -214,7 +214,7 @@ namespace Hai.UnitypackageTransferAssistant
 
             var typeName = assetOrComponent.GetType().Name;
 
-            Profiler.BeginSample($"UnitypackageTransfer.AppendAllAssets.{typeName}");
+            Profiler.BeginSample($"TransferAssistant.AppendAllAssets.{typeName}");
 
             if (assetOrComponent is Material material)
             {

@@ -28,7 +28,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Hai.UnitypackageTransferAssistant
+namespace Hai.TransferAssistant
 {
     // HEFLoc V0.1.9005
     //
