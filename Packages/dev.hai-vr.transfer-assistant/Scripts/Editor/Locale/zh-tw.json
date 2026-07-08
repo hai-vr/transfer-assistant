@@ -28,6 +28,8 @@
             "reset_to_defaults": "重置為預設值",
             "search": "搜尋",
             "target": "目標",
+            "targets": "目標",
+            "multiple_targets": "多目標",
             "traversal": "遍歷",
             "types": "類型",
             "components": "組件",

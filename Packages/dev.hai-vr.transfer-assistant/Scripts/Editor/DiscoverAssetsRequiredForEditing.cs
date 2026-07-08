@@ -57,7 +57,7 @@ namespace Hai.TransferAssistant
         /// <br/>
         /// Note: This purposefully ignores state machine transitions, state machines, and states, as controllers get special treatment.<br/>
         /// These assets are assumed to be inside the Animator Controller asset.
-        public static FindAllAssetsResult FindAllAssetsAndComponents(GameObject root, DiscoveryOptions discoveryOptions)
+        public static FindAllAssetsResult FindAllAssetsAndComponents(Object root, DiscoveryOptions discoveryOptions)
         {
             return new DiscoverAssetsRequiredForEditing().DoFindAllAssetsAndComponents(root, discoveryOptions);
         }
@@ -88,7 +88,7 @@ namespace Hai.TransferAssistant
             }
         }
 
-        private FindAllAssetsResult DoFindAllAssetsAndComponents(GameObject root, DiscoveryOptions discoveryOptions)
+        private FindAllAssetsResult DoFindAllAssetsAndComponents(Object root, DiscoveryOptions discoveryOptions)
         {
             DiscoverAndEnqueueIfApplicable(root, TraversalReason.IsRoot, null);
             
@@ -424,6 +424,6 @@ namespace Hai.TransferAssistant
     internal struct FindAllAssetsResult
     {
         public HashSet<Object> FoundAssets;
-        public new Dictionary<Object, List<TraversalLog>> ReasonsForDiscovery;
+        public Dictionary<Object, List<TraversalLog>> ReasonsForDiscovery;
     }
 }

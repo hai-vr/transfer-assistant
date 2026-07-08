@@ -28,6 +28,8 @@
             "reset_to_defaults": "重置为默认值",
             "search": "搜索",
             "target": "目标",
+            "targets": "目标",
+            "multiple_targets": "多目标",
             "traversal": "遍历",
             "types": "类型",
             "components": "组件",

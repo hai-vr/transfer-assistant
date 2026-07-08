@@ -28,6 +28,8 @@
             "reset_to_defaults": "Reset to defaults",
             "search": "Search",
             "target": "Target",
+            "targets": "Targets",
+            "multiple_targets": "Multiple targets",
             "traversal": "Traversal",
             "types": "Types",
             "components": "Components",

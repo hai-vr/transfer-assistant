@@ -28,6 +28,8 @@
             "reset_to_defaults": "Réinitialiser aux valeurs par défaut",
             "search": "Rechercher",
             "target": "Cible",
+            "targets": "Cibles",
+            "multiple_targets": "Cibles multiples",
             "traversal": "Parcours",
             "types": "Types",
             "components": "Composants",

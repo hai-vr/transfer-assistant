@@ -28,6 +28,8 @@
             "reset_to_defaults": "デフォルトにリセット",
             "search": "検索",
             "target": "ターゲット",
+            "targets": "ターゲット",
+            "multiple_targets": "複数ターゲット",
             "traversal": "トラバーサル",
             "types": "種類",
             "components": "コンポーネント",

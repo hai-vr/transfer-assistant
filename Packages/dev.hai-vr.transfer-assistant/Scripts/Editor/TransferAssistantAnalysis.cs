@@ -11,9 +11,8 @@ namespace Hai.TransferAssistant
     {
         internal const string UnknownAssetAndDLLTypeName = "DefaultAsset";
         
-        private Object _target;
+        private HashSet<Object> _targets;
         
-        public bool IsTargetAnAsset;
         public Dictionary<GameObject, HashSet<GameObject>> DataPrefabObjectToInstances;
         public List<Type> DataSortedTypes;
         
@@ -25,60 +24,62 @@ namespace Hai.TransferAssistant
         private HashSet<string> _excludedTypeNames;
         private bool _includeEditorOnly;
 
-        public void DoPerformAnalysis(Object target, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly)
+        public void DoPerformAnalysis(List<Object> targets, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly)
         {
-            if (target == null)
+            if (targets.Count == 0)
             {
-                Debug.LogWarning("Target is null.");
+                Debug.LogWarning("Targets is empty.");
                 return;
             }
 
-            var targetChanged = target != _target;
-            _target = target;
+            _targets = targets.ToHashSet();
             _excludedTypeNames = afterCullingTypeFullNames.ToHashSet();
             _includeEditorOnly = includeEditorOnly;
-            IsTargetAnAsset = target != null && EditorUtility.IsPersistent(target);
 
-            if (targetChanged)
-            {
-                DiscoverPrefabInstances(target);
-                DiscoverThroughTraversal(target);
-            }
-            
+            DiscoverPrefabInstances(targets);
+            DiscoverThroughTraversal(targets);
             UpdateCullingInternal();
         }
 
-        private void DiscoverThroughTraversal(Object target)
+        private void DiscoverThroughTraversal(List<Object> targets)
         {
-            // TODO: Reorganize this.
-            // - Find all assets through traversal of the real Objects.
-            // - Build the deep view.
-            // Process culling:
-            // - Set all flags of the deepview to false, including dead-end check.
-            // - Use culling options to walk through the deep view, only walking through permitted types and permitted traversal reasons, setting the flag to true.
-            //   - Note: We do not walk through assets if the traversal reason is a source prefab drive-by.
-            // - For each deepview that is true and are persistent assets, walk backwards towards the original objects, so that anything that isn't marked becomes a dead end.
-            // - For each dead-end, set the flag of the deepview to false.
-            // - Reconstruct the secondary view where assets are collapsed to their persistent asset, if available.
-            // Process caching:
-            // - Cache the filtering by search.
+            DataDeepviews = new Dictionary<Object, Deepview>();
+            DataTypeCounts = new Dictionary<Type, int>();
             
-            if (target is not GameObject targetGo)
+            var dataTraversalDependentToOrigins = new Dictionary<Object, List<TraversalLog>>();
+            var traversalResults = new HashSet<Object>();
+            
+            foreach (var target in targets)
             {
-                return;
+                var results = DiscoverAssetsRequiredForEditing.FindAllAssetsAndComponents(target, new DiscoveryOptions
+                {
+                    IncludePrefabSource = true,
+                    IncludeDefaultTexturesInsideShader = true,
+                    IncludeDriveByAssets = false,
+                    IncludePrefabInstanceGhostReferences = false,
+                });
+                foreach (var pair in results.ReasonsForDiscovery)
+                {
+                    if (!dataTraversalDependentToOrigins.ContainsKey(pair.Key))
+                    {
+                        dataTraversalDependentToOrigins.Add(pair.Key, new List<TraversalLog>());
+                    }
+                    dataTraversalDependentToOrigins[pair.Key].AddRange(pair.Value);
+                }
+                traversalResults.UnionWith(results.FoundAssets);
             }
+            
+            DiscoverThroughTraversal(dataTraversalDependentToOrigins, traversalResults.ToList());
+            
+            DataSortedTypes = DataTypeCounts.Keys
+                .OrderBy(t => t.Name == UnknownAssetAndDLLTypeName)
+                .ThenBy(t => t.Name, StringComparer.InvariantCulture).ToList();
+        }
 
-            var results = DiscoverAssetsRequiredForEditing.FindAllAssetsAndComponents(targetGo, new DiscoveryOptions
-            {
-                IncludePrefabSource = true,
-                IncludeDefaultTexturesInsideShader = true,
-                IncludeDriveByAssets = false,
-                IncludePrefabInstanceGhostReferences = false,
-            });
-
-            var dataTraversalDependentToOrigins = results.ReasonsForDiscovery;
+        private void DiscoverThroughTraversal(Dictionary<Object, List<TraversalLog>> dataTraversalDependentToOrigins, List<Object> traversalResults)
+        {
             var dataTraversalOriginToDependents = new Dictionary<Object, List<TraversalLog>>();
-
+            
             foreach (var dependentToOrigins in dataTraversalDependentToOrigins)
             {
                 foreach (var traversalLog in dependentToOrigins.Value)
@@ -96,7 +97,6 @@ namespace Hai.TransferAssistant
                 }
             }
             
-            DataDeepviews = new Dictionary<Object, Deepview>();
             var allAssetsInTraversal = new HashSet<Object>();
             foreach (var kvp in dataTraversalOriginToDependents)
             {
@@ -157,10 +157,6 @@ namespace Hai.TransferAssistant
                 });
             }
 
-            var traversalResults = new List<Object>(results.FoundAssets);
-
-            DataTypeCounts = new Dictionary<Type, int>();
-            var typeToAssets = new Dictionary<Type, List<Object>>();
             foreach (var asset in traversalResults)
             {
                 if (asset == null) continue;
@@ -172,18 +168,7 @@ namespace Hai.TransferAssistant
                 {
                     DataTypeCounts[typeName]++;
                 }
-                
-                if (!typeToAssets.ContainsKey(typeName))
-                {
-                    typeToAssets[typeName] = new List<Object>();
-                }
-
-                typeToAssets[typeName].Add(asset);
             }
-
-            DataSortedTypes = DataTypeCounts.Keys
-                .OrderBy(t => t.Name == UnknownAssetAndDLLTypeName)
-                .ThenBy(t => t.Name, StringComparer.InvariantCulture).ToList();
         }
 
         private bool IsAnyEditorOnly(Object asset)
@@ -199,28 +184,31 @@ namespace Hai.TransferAssistant
             return false;
         }
 
-        private void DiscoverPrefabInstances(Object target)
+        private void DiscoverPrefabInstances(List<Object> targets)
         {
             DataPrefabObjectToInstances = new Dictionary<GameObject, HashSet<GameObject>>();
-            if (target is GameObject targetGo)
+            foreach (var target in targets)
             {
-                var tryFindPrefabsIn = new Queue<GameObject>();
-                tryFindPrefabsIn.Enqueue(targetGo);
-                while (tryFindPrefabsIn.TryDequeue(out var root))
+                if (target is GameObject targetGo)
                 {
-                    var prefabInstances = FindAllPrefabInstances(root);
-                    foreach (var prefabInstance in prefabInstances)
+                    var tryFindPrefabsIn = new Queue<GameObject>();
+                    tryFindPrefabsIn.Enqueue(targetGo);
+                    while (tryFindPrefabsIn.TryDequeue(out var root))
                     {
-                        var prefabSource = PrefabUtility.GetCorrespondingObjectFromSource(prefabInstance);
-                        if (DataPrefabObjectToInstances.TryGetValue(prefabSource, out var instances))
+                        var prefabInstances = FindAllPrefabInstances(root);
+                        foreach (var prefabInstance in prefabInstances)
                         {
-                            instances.Add(prefabInstance);
-                            // We don't traverse the prefab source again, because it already existed in the dictionary.
-                        }
-                        else
-                        {
-                            DataPrefabObjectToInstances.Add(prefabSource, new HashSet<GameObject> { prefabInstance });
-                            tryFindPrefabsIn.Enqueue(prefabInstance);
+                            var prefabSource = PrefabUtility.GetCorrespondingObjectFromSource(prefabInstance);
+                            if (DataPrefabObjectToInstances.TryGetValue(prefabSource, out var instances))
+                            {
+                                instances.Add(prefabInstance);
+                                // We don't traverse the prefab source again, because it already existed in the dictionary.
+                            }
+                            else
+                            {
+                                DataPrefabObjectToInstances.Add(prefabSource, new HashSet<GameObject> { prefabInstance });
+                                tryFindPrefabsIn.Enqueue(prefabInstance);
+                            }
                         }
                     }
                 }
@@ -244,11 +232,6 @@ namespace Hai.TransferAssistant
             AfterCullingDataDeepviews = new Dictionary<Object, Deepview>();
             AfterCullingTypeCounts = new Dictionary<Type, int>();
             TotalAfterCulling = 0;
-
-            if (_target == null || DataDeepviews == null)
-            {
-                return;
-            }
             
             // First, reset.
             foreach (var current in DataDeepviews.Values)
@@ -261,7 +244,10 @@ namespace Hai.TransferAssistant
             
             var visited = new HashSet<Object>();
             var reachabilityQueue = new Queue<Object>();
-            reachabilityQueue.Enqueue(_target);
+            foreach (var target in _targets)
+            {
+                reachabilityQueue.Enqueue(target);
+            }
             
             // Then, mark all assets that are reachable from the root.
             while (reachabilityQueue.TryDequeue(out var dequeu))
@@ -273,7 +259,7 @@ namespace Hai.TransferAssistant
                     if (!isExcludedType && (_includeEditorOnly || (
                             // Prefabs still need child prefabs to exist in the project, even if that GameObject is inside EditorOnly.
                             !deepview.isEditorOnly || deepview.isAnyPrefabInstanceRoot
-                        )) || dequeu == _target)
+                        )) || _targets.Contains(dequeu))
                     {
                         deepview.isReachable = true;
                         if (deepview.isAssetOnDisk)

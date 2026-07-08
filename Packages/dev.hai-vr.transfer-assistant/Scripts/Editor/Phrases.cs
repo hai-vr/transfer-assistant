@@ -24,6 +24,8 @@ namespace Hai.TransferAssistant
         public const string reset_to_defaults = nameof(reset_to_defaults);
         public const string search = nameof(search);
         public const string target = nameof(target);
+        public const string targets = nameof(targets);
+        public const string multiple_targets = nameof(multiple_targets);
         public const string traversal = nameof(traversal);
         public const string types = nameof(types);
         public const string components = nameof(components);
