@@ -1,0 +1,16 @@
+{
+  "name": "dev.hai-vr.unitypackage-transfer-assistant",
+  "displayName": "Haï ~ .unitypackage Transfer Assistant",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "description": ".unitypackage Transfer Assistant",
+  "author" : {
+    "name" : "Haï~"
+  },
+  "vpmDependencies": {
+  },
+  "url" : "https://docs.hai-vr.dev/docs/products/unitypackage-transfer-assistant",
+  "documentationUrl": "https://docs.hai-vr.dev/docs/products/unitypackage-transfer-assistant",
+  "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/unitypackage-transfer-assistant",
+  "license": "NOT DEFINED, CHANGE ME"
+}
