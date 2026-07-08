@@ -394,7 +394,9 @@ namespace Hai.TransferAssistant
             ) return true;
             
             var fullName = current.GetType().FullName;
-            if (fullName.EndsWith(".VRCAnimatorTrackingControl")) return true;
+            
+            // VRCAnimatorTrackingControl seems to be slow to traverse??? Just don't bother, this is a leaf.
+            if (fullName == "VRC.SDK3.Avatars.Components.VRCAnimatorTrackingControl") return true;
             
             return false;
         }
