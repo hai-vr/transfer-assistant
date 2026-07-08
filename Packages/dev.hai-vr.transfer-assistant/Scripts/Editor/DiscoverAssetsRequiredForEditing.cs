@@ -10,21 +10,29 @@ namespace Hai.TransferAssistant
 {
     internal class DiscoveryOptions
     {
-        /// Prefab instances need to retain their prefab source at Edit time.
-        public bool IncludePrefabSource = true;
+        /// Prefab instances must retain a working reference to their prefab source at Edit time, otherwise the exported prefab would be unusable.<br/>
+        /// This is the main difference in requirement compared to avatar builds.
+        public bool IncludePrefabSource = true; // Recommendation is true, always, for the use case that this discovery utility is built for. If this was for avatar builds, things would be different.
         
-        /// Default textures are not included in a build, and may or may not be necessary in a .unitypackage depending on the use.
+        /// Some shaders have references to default textures in them.<br/>
+        /// Default textures are not included in a build, and may or may not be necessary in a .unitypackage depending on the use.<br/>
         /// (note that since an export does not include shaders by default, it generally means those textures wouldn't get included by default either)
-        public bool IncludeDefaultTexturesInsideShader = true;
+        public bool IncludeDefaultTexturesInsideShader = true; // Recommendation is true, because if the user wants to include shaders, they probably want the textures too.
         
-        /// Assets that are siblings (= neighboring sub-assets) of another asset are not included in a build, but would be present in a .unitypackage.
-        public bool IncludeDriveByAssets = true;
+        /// Assets that are siblings (= neighboring sub-assets) of another asset are not included in a build, but would be present in a default Unity .unitypackage, along with everything that those sibling assets depend on.<br/>
+        /// Example: We depend on a Mesh of a FBX. The FBX references a Material that has a Texture. The Material and the Texture are included through drive-by.<br/>
+        /// Such an inclusion is questionable for transferring assets, but it may be needed sometimes.
+        public bool IncludeDriveByAssets = true; // Recommendation is false, often. If IncludeReferencesContainedWithinPrefabSource is true, it will often preclude this.
         
-        /// Prefabs instances may contain ghost references, which may or may not be desirable. 
-        public bool IncludePrefabInstanceGhostReferences = false;
+        /// Prefabs instances may contain ghost references, which are very often not desirable.<br/>
+        /// This happens when an override is applied to a prefab instance, and the GameObject or Component is then removed; the override still remains,
+        /// and is restored when the GameObject or Component is un-removed.<br/>
+        /// Setting this to true will introspect all overrides on that prefab instance.
+        public bool IncludePrefabInstanceGhostReferences = false; // Recommendation is false, always. If the user overrides stuff, the useful assets will show up during normal traversal of the objects.
 
-        // Assets that are referenced by a prefab source are not included in a build, and are not necessarily needed by the user.
-        public bool IncludeReferencesContainedWithinPrefabSource = false;
+        // Assets that are referenced by a prefab source are not included in a build, and are not necessarily needed by the user.<br/>
+        // If the user plans to start from the original prefab from scratch, then they may need those assets.
+        public bool IncludeReferencesContainedWithinPrefabSource = false; // Recommendation is false, very often, since the user usually wants to transfer only the assets they need for their active avatar setup.
     }
     
     /// This utility class recursively walks through the objects that are required by a root object. However, it also walks through objects
@@ -46,10 +54,6 @@ namespace Hai.TransferAssistant
         private DiscoverAssetsRequiredForEditing() { }
 
         /// Finds all assets needed by a project at Edit time, meant for use in .unitypackage asset transfer. This is not meant for finding assets that will be included in a build.<br/>
-        /// TODO: Modes<br/>
-        /// - Mode 1: Referenced by objects in the hierarchy, including source prefabs GameObject, but not additional objects referenced by those source prefabs.<br/>
-        /// - Mode 2: Referenced by objects in the hierarchy, including assets used by source prefab references.<br/>
-        /// - Mode 3: Referenced by prefab instance property overrides, including when the GameObject or the Component containing that property override was removed.<br/>
         /// <br/>
         /// Note: This purposefully ignores state machine transitions, state machines, and states, as controllers get special treatment.<br/>
         /// These assets are assumed to be inside the Animator Controller asset.
@@ -206,10 +210,11 @@ namespace Hai.TransferAssistant
                 throw new InvalidOperationException("Transform and GameObject are not supposed to be passed to this function.");
             }
 
-            // if (assetOrComponent is MonoScript) return; // We ignore scripts during this search.
+            // Animator states are too slow, we're skipping all of this here. There's special treatment of animator controllers in UnpackStateMachine.
             if (assetOrComponent is AnimatorTransitionBase) return;
             if (assetOrComponent is AnimatorState) return;
             if (assetOrComponent is AnimatorStateMachine) return;
+            
             if (IsLeaf(assetOrComponent)) return;
 
             var typeName = assetOrComponent.GetType().Name;
@@ -318,7 +323,8 @@ namespace Hai.TransferAssistant
                         }
                         else if (sp.arrayElementType == "UnityEngine.Transform")
                         {
-                            // This has a risk of skipping hacks like GameObject asset reference in the project, or instantiations in some games like Cilbox
+                            // We're skipping transform arrays. This can be considered a flaw, but it's very rarely something we want.
+                            // This has a risk of skipping hacks like GameObject asset reference in the project, or prefab instantiations in some games like those that integrate Cilbox.
                             skipRecursion = true;
                         }
                         else
@@ -336,9 +342,7 @@ namespace Hai.TransferAssistant
                         if (sp.propertyType == SerializedPropertyType.ObjectReference)
                         {
                             var value = sp.objectReferenceValue;
-                            if (value /*!= null*/
-                                // && value is not MonoScript
-                                ) // We ignore scripts during this search.
+                            if (value /*!= null*/)
                             {
                                 DiscoverAndEnqueueIfApplicable(Detransform(value), TraversalReason.IsObjectReference, assetOrComponent, generator);
                             }
@@ -377,6 +381,7 @@ namespace Hai.TransferAssistant
             return value is Transform valueTransform ? valueTransform.gameObject : value;
         }
 
+        /// We don't want to introspect assets that are known not to reference anything else.
         private static bool IsLeaf(Object current)
         {
             if (current == null) return true;

@@ -4,14 +4,17 @@ Transfer Assistant
 This Unity tool will assist you when you want to use the *Export .unitypackage* function to **transfer assets from one project
 to another project**, while stripping assets that you deem unnecessary.
 
-- Instead of exporting every asset referenced by prefabs, it only exports assets that exist on the main avatar.
-  If a prefab uses an asset that the main avatar does not, it's not included (this is the default behavior, but it can be changed).
-- You may choose to cull assets by type, along with any asset referenced by those assets. Culling materials will also cull textures used by those materials.
-- You may choose to ignore assets referenced by specific components. Ignoring *Modular Avatar Menu Item* will also ignore icon textures referenced by those components.
-- You may choose to ignore assets marked as EditorOnly.
-- If an asset is being included in the export, but you are not sure why that's the case, the Transfer Assistant UI can help you locate which object or component depends on it.
+Rather than including all referenced assets, it will deliberately ignore some of them:
 
-This does not modify the contents of Scenes or Prefabs in any way.
+- Instead of exporting every asset referenced by prefabs, it only exports assets that exist on the main avatar.
+  If a prefab uses an asset that the main avatar does not, it is not included (this is the default behavior, but it can be changed).
+- You may choose to ignore assets by type, along with any asset referenced by those assets. Ignoring materials will also ignore textures used by those materials.
+- You may choose to ignore assets referenced by specific component types. Ignoring the *Modular Avatar Menu Item* component will also ignore the icon textures referenced by those components.
+- You may choose to ignore assets referenced by objects marked as EditorOnly.
+
+If a suspicious asset is being included in the export, and you are not sure why that's the case, the *Transfer Assistant* user interface can help you locate which object or component depends on it.
+
+*Transfer Assistant* will never modify the contents of Scenes or Prefabs.
 
 The intended use case for this tool is to **export an avatar project file between different games**, e.g. from a Unity 2022 BIRP project to a standalone Unity 6.4 URP project.
 In such a project, assets are scattered across multiple folders, and within those folders, there are assets that you want to exclude because they serve no purpose in the destination project,
@@ -49,6 +52,14 @@ from a custom avatar. However, the contents of the export often end up with extr
 This tool attempts to facilitate the transfer of an avatar between incompatible game projects by offering opportunities to cull superfluous assets while keeping the avatar in an editable state in the destination project.
 
 Transfer Assistant does not modify the contents of scenes or prefabs in any way.
+
+### Before
+
+![before.png](Documentation/before.png)
+
+### After
+
+![after.png](Documentation/after.png)
 
 ## Reference manual
 
