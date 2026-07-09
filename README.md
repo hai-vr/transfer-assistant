@@ -55,7 +55,7 @@ from a custom avatar. However, the contents of the export often end up with extr
 
 This tool attempts to facilitate the transfer of an avatar between incompatible game projects by offering opportunities to cull superfluous assets while keeping the avatar in an editable state in the destination project.
 
-Transfer Assistant does not modify the contents of scenes or prefabs in any way.
+*Transfer Assistant* will never modify the contents of Scenes or Prefabs.
 
 ### Before
 
@@ -72,6 +72,17 @@ Transfer Assistant does not modify the contents of scenes or prefabs in any way.
 In the *Project* tab, right-click a prefab or scene and choose *Transfer Assistant...*
 
 Alternatively, you can go to *Window > Haï~ > Transfer Assistant*, then choose a prefab, and click the *Perform analysis* button.
+
+#### Selecting multiple targets
+
+The dropdown on the top right lets you switch between different object selection modes.
+
+- **Single Target**: Only one root object is analyzed.
+- **Multiple Targets**: Multiple root objects are analyzed.
+- **Current Scenes**: Add root objects of all opened scenes are analyzed, and the Scene itself is added for export.
+  - For now, this does **not** include render settings from the scenes. Skybox, lighting data, and other scene references won't be included in the export.
+
+If you decide to change the target, click the *Perform analysis* button before continuing.
 
 ### Transfer Assistant window
 

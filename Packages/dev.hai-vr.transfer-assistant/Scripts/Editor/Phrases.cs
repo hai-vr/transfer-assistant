@@ -25,7 +25,10 @@ namespace Hai.TransferAssistant
         public const string search = nameof(search);
         public const string target = nameof(target);
         public const string targets = nameof(targets);
-        public const string multiple_targets = nameof(multiple_targets);
+        public const string target_mode = nameof(target_mode);
+        public const string target_mode_single = nameof(target_mode_single);
+        public const string target_mode_multiple = nameof(target_mode_multiple);
+        public const string target_mode_current_scenes = nameof(target_mode_current_scenes);
         public const string traversal = nameof(traversal);
         public const string types = nameof(types);
         public const string components = nameof(components);

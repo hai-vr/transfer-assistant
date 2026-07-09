@@ -92,6 +92,12 @@ namespace Hai.TransferAssistant
         {
             DiscoverAndEnqueueIfApplicable(root, TraversalReason.IsRoot, null);
             
+            // There used to be code for loading scenes, but it was removed because inspecting scene assets in this way
+            // leads to really poor and unhelpful results.
+            // It's too difficult to load a scene just to get its GameObjects without interfering with the currently loaded scenes,
+            // with the RenderSettings being global.
+            // The new way is a target selection mode dropdown where only the currently loaded scenes will be inspected.
+            
             while (_queue.TryDequeue(out var current))
             {
                 if (current is GameObject currentGo)

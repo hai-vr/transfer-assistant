@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace Hai.TransferAssistant
@@ -13,7 +14,7 @@ namespace Hai.TransferAssistant
         private const string AfterCullingTypeFullNamesPrefsKey = PrefsPrefix + "AfterCullingTypeFullNames";
         private const string HideItemsFilterPrefsKey = PrefsPrefix + "HideItemsFilter";
         private const string IncludeEditorOnlyPrefsKey = PrefsPrefix + "IncludeEditorOnly";
-        private const string MultiTargets = PrefsPrefix + "MultiTargets";
+        private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
         private const float SidebarWidth = 250;
 
@@ -26,7 +27,7 @@ namespace Hai.TransferAssistant
         };
 
         public Object target;
-        private bool _multiTargets;
+        private TargetMode _targetMode;
         public Object[] targets;
 
         private HashSet<string> _afterCullingTypeFullNames = AfterCullingTypeFullNamesDefault.ToHashSet();
@@ -85,9 +86,9 @@ namespace Hai.TransferAssistant
                 _includeEditorOnly = EditorPrefs.GetBool(IncludeEditorOnlyPrefsKey, true);
             }
 
-            if (EditorPrefs.HasKey(IncludeEditorOnlyPrefsKey))
+            if (EditorPrefs.HasKey(TargetModePrefsKey))
             {
-                _multiTargets = EditorPrefs.GetBool(MultiTargets, false);
+                _targetMode = (TargetMode)EditorPrefs.GetInt(TargetModePrefsKey, (int)TargetMode.SingleTarget);
             }
         }
 
@@ -96,24 +97,24 @@ namespace Hai.TransferAssistant
             EditorPrefs.SetInt(HideItemsFilterPrefsKey, (int)_hideItemsFilter);
             EditorPrefs.SetString(AfterCullingTypeFullNamesPrefsKey, string.Join(",", _afterCullingTypeFullNames));
             EditorPrefs.SetBool(IncludeEditorOnlyPrefsKey, _includeEditorOnly);
-            EditorPrefs.SetBool(MultiTargets, _multiTargets);
+            EditorPrefs.SetInt(TargetModePrefsKey, (int)_targetMode);
         }
 
         [MenuItem("Assets/Transfer Assistant...")]
         public static void AnalyzeSelection()
         {
             var window = GetWindow<TransferAssistantWindow>(ShortTitleName);
-            if (Selection.objects.Length > 0)
+            if (Selection.objects.Length > 1)
             {
                 window.target = null;
                 window.targets = Selection.objects.ToArray();
-                window._multiTargets = true;
+                window._targetMode = TargetMode.MultipleTargets;
             }
             else
             {
                 window.target = Selection.activeObject;
                 window.targets = Array.Empty<Object>();
-                window._multiTargets = false;
+                window._targetMode = TargetMode.SingleTarget;
             }
             window.ScheduleAnalysis();
         }
@@ -129,25 +130,46 @@ namespace Hai.TransferAssistant
             localize.RefreshIfNecessary();
 
             EditorGUILayout.BeginHorizontal();
-            if (_multiTargets)
+            if (_targetMode == TargetMode.MultipleTargets)
             {
                 var serializedObject = new SerializedObject(this);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(targets)), new GUIContent(localize.Text(Phrases.targets)));
                 serializedObject.ApplyModifiedProperties();
             }
-            else
+            else if (_targetMode == TargetMode.SingleTarget)
             {
                 target = EditorGUILayout.ObjectField(localize.Text(Phrases.target), target, typeof(Object), true);
             }
+            else if (_targetMode == TargetMode.CurrentScenes)
+            {
+                EditorGUI.BeginDisabledGroup(true);
+                var loadedSceneCount = SceneManager.sceneCount;
+                for (var i = 0; i < loadedSceneCount; i++)
+                {
+                    var scene = SceneManager.GetSceneAt(i);
+                    if (scene.isLoaded && !TransferAssistantAnalysis.IsIgnoredScene(scene))
+                    {
+                        var sceneAsset = AssetDatabase.LoadAssetAtPath<Object>(scene.path);
+                        if (sceneAsset != null)
+                        {
+                            EditorGUILayout.ObjectField("", sceneAsset, typeof(SceneAsset), true);
+                        }
+                    }
+                }
+                EditorGUI.EndDisabledGroup();
+            }
+
             EditorGUI.BeginChangeCheck();
-            _multiTargets = EditorGUILayout.ToggleLeft(localize.Text(Phrases.multiple_targets), _multiTargets, GUILayout.Width(150));
+            var targetModePhrases = new[] { Phrases.target_mode_single, Phrases.target_mode_multiple, Phrases.target_mode_current_scenes };
+            var targetModeOptions = targetModePhrases.Select(phrase => localize.Text(phrase)).ToArray();
+            _targetMode = (TargetMode)EditorGUILayout.Popup((int)_targetMode, targetModeOptions, GUILayout.Width(150));
             if (EditorGUI.EndChangeCheck())
             {
                 SavePrefs();
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUI.BeginDisabledGroup(target == null || _analysisScheduled);
+            EditorGUI.BeginDisabledGroup((_targetMode == TargetMode.SingleTarget && target == null) || _analysisScheduled);
             if (GUILayout.Button(_analysisScheduled ? localize.Text(Phrases.analysis_in_progress) : localize.Text(Phrases.perform_analysis)))
             {
                 ScheduleAnalysis();
@@ -640,7 +662,7 @@ namespace Hai.TransferAssistant
             {
                 try
                 {
-                    _analysis.DoPerformAnalysis(_multiTargets ? targets.Where(o => o != null).Distinct().ToList() : new List<Object> { target }, _afterCullingTypeFullNames, _includeEditorOnly);
+                    _analysis.DoPerformAnalysis(CollectTargets(), _afterCullingTypeFullNames, _includeEditorOnly);
                     RefreshCachedTypes();
                 }
                 catch (Exception e)
@@ -654,6 +676,41 @@ namespace Hai.TransferAssistant
                     Repaint();
                 }
             };
+        }
+
+        private List<Object> CollectTargets()
+        {
+            switch (_targetMode)
+            {
+                case TargetMode.SingleTarget:
+                    return new List<Object> { target };
+                case TargetMode.MultipleTargets:
+                    return targets.Where(o => o != null).Distinct().ToList();
+                case TargetMode.CurrentScenes:
+                {
+                    var objects = new List<Object>();
+                    for (var i = 0; i < SceneManager.sceneCount; i++)
+                    {
+                        var scene = SceneManager.GetSceneAt(i);
+                        if (scene.isLoaded && !TransferAssistantAnalysis.IsIgnoredScene(scene))
+                        {
+                            var sceneAsset = AssetDatabase.LoadAssetAtPath<Object>(scene.path);
+                            if (sceneAsset != null)
+                            {
+                                objects.Add(sceneAsset);
+                            }
+                            
+                            // TODO: We should also try to pull the skybox, fog settings, lighting data, etc.
+                            
+                            var rootObjects = scene.GetRootGameObjects();
+                            objects.AddRange(rootObjects);
+                        }
+                    }
+                    return objects;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(_targetMode));
+            }
         }
 
         private void RefreshCachedTypes()
@@ -711,6 +768,13 @@ namespace Hai.TransferAssistant
                 GUI.color = col;
             }
         }
+    }
+
+    public enum TargetMode
+    {
+        SingleTarget,
+        MultipleTargets,
+        CurrentScenes
     }
 
     internal enum HideItemsFilter

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace Hai.TransferAssistant
@@ -367,6 +368,11 @@ namespace Hai.TransferAssistant
                 }
             }
             return result;
+        }
+
+        public static bool IsIgnoredScene(Scene scene)
+        {
+            return scene.name.Contains("NDMF Preview");
         }
     }
     
