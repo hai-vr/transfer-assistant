@@ -1,0 +1,13 @@
+{
+  "name": "dev.hai-vr.transfer-assistant-test",
+  "displayName": "dev.hai-vr.transfer-assistant-test",
+  "version": "0.0.0",
+  "unity": "2019.4",
+  "description": "Test case for Transfer Assistant.",
+  "author" : {
+    "name" : "Haï~"
+  },
+  "vpmDependencies": {
+  },
+  "license": "NOT DEFINED, CHANGE ME"
+}
