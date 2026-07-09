@@ -32,6 +32,7 @@ namespace Hai.TransferAssistant
         public const string components = nameof(components);
         public const string options = nameof(options);
         public const string include_editor_only = nameof(include_editor_only);
+        public const string include_hidden_in_prefabs = nameof(include_hidden_in_prefabs);
         public const string unknown_assets_and_dll_files = nameof(unknown_assets_and_dll_files);
         
         public const string deselect = nameof(deselect);

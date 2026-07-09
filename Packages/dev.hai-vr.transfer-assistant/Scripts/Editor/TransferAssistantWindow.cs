@@ -14,6 +14,7 @@ namespace Hai.TransferAssistant
         private const string AfterCullingTypeFullNamesPrefsKey = PrefsPrefix + "AfterCullingTypeFullNames";
         private const string HideItemsFilterPrefsKey = PrefsPrefix + "HideItemsFilter";
         private const string IncludeEditorOnlyPrefsKey = PrefsPrefix + "IncludeEditorOnly";
+        private const string IncludeHiddenInPrefabsPrefsKey = PrefsPrefix + "IncludeHiddenInPrefabs";
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
         private const float SidebarWidth = 250;
@@ -33,6 +34,7 @@ namespace Hai.TransferAssistant
         private HashSet<string> _afterCullingTypeFullNames = AfterCullingTypeFullNamesDefault.ToHashSet();
         private HideItemsFilter _hideItemsFilter = HideItemsFilter.ShowEverything;
         private bool _includeEditorOnly = true;
+        private bool _includeHiddenInPrefabs = false;
 
         private string _search = "";
         private string _lastSearch;
@@ -90,6 +92,11 @@ namespace Hai.TransferAssistant
             {
                 _targetMode = (TargetMode)EditorPrefs.GetInt(TargetModePrefsKey, (int)TargetMode.SingleTarget);
             }
+            
+            if (EditorPrefs.HasKey(IncludeHiddenInPrefabsPrefsKey))
+            {
+                _includeHiddenInPrefabs = EditorPrefs.GetBool(IncludeHiddenInPrefabsPrefsKey, false);
+            }
         }
 
         private void SavePrefs()
@@ -98,6 +105,7 @@ namespace Hai.TransferAssistant
             EditorPrefs.SetString(AfterCullingTypeFullNamesPrefsKey, string.Join(",", _afterCullingTypeFullNames));
             EditorPrefs.SetBool(IncludeEditorOnlyPrefsKey, _includeEditorOnly);
             EditorPrefs.SetInt(TargetModePrefsKey, (int)_targetMode);
+            EditorPrefs.SetBool(IncludeHiddenInPrefabsPrefsKey, _includeHiddenInPrefabs);
         }
 
         [MenuItem("Assets/Transfer Assistant...")]
@@ -190,8 +198,10 @@ namespace Hai.TransferAssistant
                     localize.HelpBox(Phrases.msg_scene_objects_selected, MessageType.Warning);
                 }
             }
+
+            var isAnalysisPossible = invalid || _analysisScheduled;
             
-            EditorGUI.BeginDisabledGroup(invalid || _analysisScheduled);
+            EditorGUI.BeginDisabledGroup(isAnalysisPossible);
             if (GUILayout.Button(_analysisScheduled ? localize.Text(Phrases.analysis_in_progress) : localize.Text(Phrases.perform_analysis)))
             {
                 ScheduleAnalysis();
@@ -199,12 +209,12 @@ namespace Hai.TransferAssistant
             EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.BeginHorizontal();
-            LayoutSidebar();
+            LayoutSidebar(isAnalysisPossible);
             LayoutMainPane();
             EditorGUILayout.EndHorizontal();
         }
 
-        private void LayoutSidebar()
+        private void LayoutSidebar(bool isAnalysisPossible)
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(SidebarWidth));
             _sidebarScrollPos = EditorGUILayout.BeginScrollView(_sidebarScrollPos);
@@ -252,6 +262,16 @@ namespace Hai.TransferAssistant
                         _analysis.UpdateIncludeEditorOnly(_includeEditorOnly);
                         SavePrefs();
                     }
+                    EditorGUI.BeginChangeCheck();
+                    
+                    EditorGUI.BeginDisabledGroup(isAnalysisPossible);
+                    _includeHiddenInPrefabs = EditorGUILayout.ToggleLeft(localize.Text(Phrases.include_hidden_in_prefabs), _includeHiddenInPrefabs);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        SavePrefs();
+                        ScheduleAnalysis();
+                    }
+                    EditorGUI.EndDisabledGroup();
                     EditorGUILayout.Space();
 
                     if (_cachedComponents.Count > 0)
@@ -347,6 +367,7 @@ namespace Hai.TransferAssistant
                 _afterCullingTypeFullNames.UnionWith(AfterCullingTypeFullNamesDefault);
                 _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
                 _includeEditorOnly = true;
+                _includeHiddenInPrefabs = false;
                 SavePrefs();
             }
         }
@@ -676,11 +697,12 @@ namespace Hai.TransferAssistant
             if (_analysisScheduled) return;
             _analysisScheduled = true;
 
-            EditorApplication.delayCall += () =>
+            Repaint();
+            EditorApplication.delayCall += () => EditorApplication.delayCall += () =>
             {
                 try
                 {
-                    _analysis.DoPerformAnalysis(CollectTargets(), _afterCullingTypeFullNames, _includeEditorOnly);
+                    _analysis.DoPerformAnalysis(CollectTargets(), _afterCullingTypeFullNames, _includeEditorOnly, _includeHiddenInPrefabs);
                     RefreshCachedTypes();
                 }
                 catch (Exception e)

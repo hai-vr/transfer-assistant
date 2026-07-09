@@ -36,6 +36,7 @@
             "components": "컴포넌트",
             "options": "옵션",
             "include_editor_only": "EditorOnly 포함",
+            "include_hidden_in_prefabs": "프리팹 내 숨겨진 항목 포함",
             "unknown_assets_and_dll_files": "알 수 없는 에셋 및 DLL 파일",
             "deselect_all": "모두 선택 해제",
             "deselect": "선택 해제",

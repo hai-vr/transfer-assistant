@@ -36,6 +36,7 @@
             "components": "Components",
             "options": "Options",
             "include_editor_only": "Include EditorOnly",
+            "include_hidden_in_prefabs": "Include hidden in Prefabs",
             "unknown_assets_and_dll_files": "Unknown assets and DLL Files",
             "deselect_all": "Deselect All",
             "deselect": "Deselect",

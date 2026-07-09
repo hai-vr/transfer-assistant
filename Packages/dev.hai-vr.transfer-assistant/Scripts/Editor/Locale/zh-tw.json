@@ -36,6 +36,7 @@
             "components": "組件",
             "options": "選項",
             "include_editor_only": "包含 EditorOnly",
+            "include_hidden_in_prefabs": "包含 Prefab 中的隱藏項目",
             "unknown_assets_and_dll_files": "未知資源和 DLL 檔案",
             "deselect_all": "取消全選",
             "deselect": "取消選擇",

@@ -24,8 +24,9 @@ namespace Hai.TransferAssistant
         public int TotalAfterCulling;
         private HashSet<string> _excludedTypeNames;
         private bool _includeEditorOnly;
+        private bool _includeHiddenInPrefabs;
 
-        public void DoPerformAnalysis(List<Object> targets, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly)
+        public void DoPerformAnalysis(List<Object> targets, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly, bool includeHiddenInPrefabs)
         {
             if (targets.Count == 0)
             {
@@ -36,6 +37,7 @@ namespace Hai.TransferAssistant
             _targets = ExpandFolders(targets.ToHashSet());
             _excludedTypeNames = afterCullingTypeFullNames.ToHashSet();
             _includeEditorOnly = includeEditorOnly;
+            _includeHiddenInPrefabs = includeHiddenInPrefabs;
 
             DiscoverPrefabInstances();
             DiscoverThroughTraversal();
@@ -82,6 +84,7 @@ namespace Hai.TransferAssistant
                     IncludeDefaultTexturesInsideShader = true,
                     IncludeDriveByAssets = false,
                     IncludePrefabInstanceGhostReferences = false,
+                    IncludeReferencesContainedWithinPrefabSource = _includeHiddenInPrefabs
                 });
                 foreach (var pair in results.ReasonsForDiscovery)
                 {

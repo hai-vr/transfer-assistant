@@ -93,16 +93,22 @@ These checkboxes have a cascading effect; unchecking Materials will affect which
 - **Culling** checkboxes:
   - When checking an asset type, those asset types are included, and any other asset referenced by those asset types is discovered and traversed.
   - When unchecking an asset type, those asset types are not included, and assets referenced by those asset types are not discovered.
-- **Include EditorOnly**:
-  - When checked, all objects are included.
-  - When unchecked, assets referenced inside `EditorOnly` objects and any of their children are not included.
-    - However, prefabs are always included, even if the prefab instance is EditorOnly.
-  - *This does not remove the GameObjects or Components marked as EditorOnly from the prefab. Transfer Assistant never modifies prefabs nor scenes.*
 - **Component** checkboxes:
   - When checking a component, any other asset referenced by those components is discovered and traversed.
   - When unchecking a component, assets referenced by those components are not discovered.
   - *This does not remove the Components from the prefab. Transfer Assistant never modifies prefabs nor scenes.*
-
+- **Include EditorOnly**:
+  - When checked, all objects are included. **This is the default option.**
+  - When unchecked, assets referenced inside `EditorOnly` objects and any of their children are not included.
+    - However, prefabs are always included, even if the prefab instance is EditorOnly.
+  - *This does not remove the GameObjects or Components marked as EditorOnly from the prefab. Transfer Assistant never modifies prefabs nor scenes.*
+- **Include hidden in Prefabs**:
+  - This option is related to how overriding a Prefab instance hides the assets inside the source Prefab.
+  - When checked, assets nested inside source Prefabs are included, even if your target object does not use it in its hierarchy because it overrides it.
+    - This is the recommended option for **world-like projects**.
+  - When unchecked, assets nested inside source Prefabs are not included, so that the only assets that are included are those that your target object uses.
+    - This is the recommended option for **avatar-like projects**, and thus is the default option.
+  
 ### Prepare Export window
 
 In the sidebar, press the *Prepare Export...* button. This will open a new window which looks similar to the *Export .unitypackage* window.

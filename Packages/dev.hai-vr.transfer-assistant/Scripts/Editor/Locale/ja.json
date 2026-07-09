@@ -36,6 +36,7 @@
             "components": "コンポーネント",
             "options": "設定",
             "include_editor_only": "EditorOnly を含める",
+            "include_hidden_in_prefabs": "Prefab 内の非表示項目を含める",
             "unknown_assets_and_dll_files": "不明なアセットおよび DLL ファイル",
             "deselect_all": "すべて選択解除",
             "deselect": "選択解除",
