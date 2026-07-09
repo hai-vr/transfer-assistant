@@ -40,7 +40,7 @@ namespace Hai.TransferAssistant
         private bool _includeHiddenInPrefabs = false;
 
         private string _search = "";
-        private string _lastSearch;
+        private Object _searchObject;
 
         private bool _analysisScheduled;
         private TransferAssistantAnalysis _analysis;
@@ -372,19 +372,21 @@ namespace Hai.TransferAssistant
             localize.LabelField(Phrases.exploration, EditorStyles.boldLabel);
             localize.HelpBox(Phrases.msg_will_not_affect_export, MessageType.None);
             EditorGUILayout.BeginHorizontal();
-            _search = EditorGUILayout.TextField(localize.Text(Phrases.search), _search);
-            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_search));
+            var prevSearch = _search;
+            _search = EditorGUILayout.TextField(localize.Text(Phrases.search), prevSearch);
+            if (prevSearch != _search)
+            {
+                _searchObject = null;
+            }
+            _searchObject = EditorGUILayout.ObjectField(_searchObject, typeof(Object), true);
+            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_search) && _searchObject == null);
             if (GUILayout.Button("×", GUILayout.Width(20)))
             {
                 _search = "";
+                _searchObject = null;
             }
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
-
-            if (_search != _lastSearch)
-            {
-                _lastSearch = _search;
-            }
 
             if (_analysis.DataPrefabObjectToInstances != null)
             {
@@ -437,11 +439,15 @@ namespace Hai.TransferAssistant
             if (_visualizeTreeBuilder == null)
             {
                 _visualizeTreeBuilder = new VisualizeTreeBuilder(_localize);
+                _visualizeTreeBuilder.OnSearchObjectRequested = obj =>
+                {
+                    _searchObject = _searchObject == obj ? null : obj;
+                };
                 _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
                 _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
             }
 
-            _visualizeTreeBuilder.MarkVisible(_search);
+            _visualizeTreeBuilder.MarkVisible(_search, _searchObject);
         }
 
         private void ScheduleAnalysis()

@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Hai.TransferAssistant
 {
@@ -11,6 +13,7 @@ namespace Hai.TransferAssistant
         private TransferAssistantAnalysis _analysis;
         private TreeViewState _treeViewState;
         private DependencyTreeView _treeView;
+        public Action<Object> OnSearchObjectRequested;
 
         public VisualizeTreeBuilder(HaiEFLoc localize)
         {
@@ -23,7 +26,7 @@ namespace Hai.TransferAssistant
             _treeView = null;
         }
 
-        public void MarkVisible(string searchString)
+        public void MarkVisible(string searchString, Object searchObject)
         {
             if (_analysis == null) return;
 
@@ -31,6 +34,7 @@ namespace Hai.TransferAssistant
             {
                 _treeViewState ??= new TreeViewState();
                 _treeView = new DependencyTreeView(_treeViewState, _analysis, _localize);
+                _treeView.OnSearchObjectRequested = obj => OnSearchObjectRequested?.Invoke(obj);
                 _treeView.Reload();
                 _treeView.ExpandAll();
             }
@@ -38,6 +42,11 @@ namespace Hai.TransferAssistant
             if (_treeView.CustomSearchString != searchString)
             {
                 _treeView.CustomSearchString = searchString;
+            }
+
+            if (_treeView.CustomSearchObject != searchObject)
+            {
+                _treeView.CustomSearchObject = searchObject;
             }
 
             var rect = EditorGUILayout.GetControlRect(false, GUILayout.ExpandHeight(true), GUILayout.MinHeight(200));
@@ -51,6 +60,10 @@ namespace Hai.TransferAssistant
         private readonly TransferAssistantAnalysis _analysis;
         private readonly HaiEFLoc _localize;
         private string _customSearchString;
+        private Object _customSearchObject;
+
+        public Action<Object> OnSearchObjectRequested;
+        private Texture searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
 
         public string CustomSearchString
         {
@@ -61,7 +74,24 @@ namespace Hai.TransferAssistant
                 {
                     _customSearchString = value;
                     Reload();
-                    if (!string.IsNullOrEmpty(_customSearchString))
+                    if (!string.IsNullOrEmpty(_customSearchString) || _customSearchObject != null)
+                    {
+                        ExpandAll();
+                    }
+                }
+            }
+        }
+
+        public Object CustomSearchObject
+        {
+            get => _customSearchObject;
+            set
+            {
+                if (_customSearchObject != value)
+                {
+                    _customSearchObject = value;
+                    Reload();
+                    if (!string.IsNullOrEmpty(_customSearchString) || _customSearchObject != null)
                     {
                         ExpandAll();
                     }
@@ -128,11 +158,11 @@ namespace Hai.TransferAssistant
 
         protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
         {
-            if (string.IsNullOrEmpty(_customSearchString)) return base.BuildRows(root);
+            if (string.IsNullOrEmpty(_customSearchString) && _customSearchObject == null) return base.BuildRows(root);
 
             var matchingItems = new HashSet<TreeViewItem>();
             
-            FindMatchesAndRelatives(root, _customSearchString, matchingItems);
+            FindMatchesAndRelatives(root, matchingItems);
 
             var filteredRows = new List<TreeViewItem>();
             if (root.hasChildren)
@@ -143,9 +173,9 @@ namespace Hai.TransferAssistant
             return filteredRows;
         }
 
-        private void FindMatchesAndRelatives(TreeViewItem item, string search, HashSet<TreeViewItem> matchingItems)
+        private void FindMatchesAndRelatives(TreeViewItem item, HashSet<TreeViewItem> matchingItems)
         {
-            if (item.id != 0 && DoesItemMatchSearch(item, search))
+            if (item.id != 0 && DoesItemMatchSearch(item))
             {
                 AddMatchAndAncestors(item, matchingItems);
                 AddDescendants(item, matchingItems);
@@ -155,7 +185,7 @@ namespace Hai.TransferAssistant
             {
                 foreach (var child in item.children)
                 {
-                    FindMatchesAndRelatives(child, search, matchingItems);
+                    FindMatchesAndRelatives(child, matchingItems);
                 }
             }
         }
@@ -175,9 +205,13 @@ namespace Hai.TransferAssistant
             }
         }
 
-        private bool DoesItemMatchSearch(TreeViewItem item, string search)
+        private bool DoesItemMatchSearch(TreeViewItem item)
         {
-            return item.displayName.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) >= 0;
+            if (_customSearchObject != null)
+            {
+                return item is DependencyTreeViewItem dependencyItem && dependencyItem.Target == _customSearchObject;
+            }
+            return !string.IsNullOrEmpty(_customSearchString) && item.displayName.IndexOf(_customSearchString, System.StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void AddMatchAndAncestors(TreeViewItem item, HashSet<TreeViewItem> matchingItems)
@@ -228,6 +262,16 @@ namespace Hai.TransferAssistant
             objectFieldRect.x += indent;
             objectFieldRect.width -= indent;
 
+            {
+                var buttonWidth = 25;
+                objectFieldRect.width -= buttonWidth + 4;
+                var buttonRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, buttonWidth, objectFieldRect.height);
+                if (GUI.Button(buttonRect, searchIcon, EditorStyles.miniButton))
+                {
+                    OnSearchObjectRequested?.Invoke(item.Target);
+                }
+            }
+
             if (item.AlreadyVisited && item.HasDependencies)
             {
                 var labelContent = new GUIContent(_localize.Text(Phrases.already_shown));
@@ -266,25 +310,33 @@ namespace Hai.TransferAssistant
                 );
             }
             
-            var isMatch = !string.IsNullOrEmpty(_customSearchString) && DoesItemMatchSearch(item, _customSearchString);
+            var isMatch = DoesItemMatchSearch(item);
             var prevFontStyle = EditorStyles.objectField.fontStyle;
-            if (isMatch)
+            try
             {
-                EditorStyles.objectField.fontStyle = FontStyle.Bold;
-            }
-            
-            EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPrefabDiskAsset);
-            TransferAssistantWindow.ColoredBackgroundVoid(
-                isAnyPrefabInstanceRoot || isComponentOrStateMachineBehaviour || isPrefabDiskAsset,
-                isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor :
+                if (isMatch)
+                {
+                    EditorStyles.objectField.fontStyle = FontStyle.Bold;
+                }
+
+                TransferAssistantWindow.ColoredBackgroundVoid(
+                    isAnyPrefabInstanceRoot || isComponentOrStateMachineBehaviour || isPrefabDiskAsset,
+                    isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor :
                     isPrefabDiskAsset ? TransferAssistantWindow.PersistentGameObjectColor :
                     TransferAssistantWindow.PrefabInstanceRootGameObjectColor,
-                () => EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false));
-            EditorGUI.EndDisabledGroup();
-            
-            if (isMatch)
+                    () =>
+                    {
+                        EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPrefabDiskAsset);
+                        EditorGUI.EndDisabledGroup();
+                        EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false);
+                    });
+            }
+            finally
             {
-                EditorStyles.objectField.fontStyle = prevFontStyle;
+                if (isMatch)
+                {
+                    EditorStyles.objectField.fontStyle = prevFontStyle;
+                }
             }
         }
     }
