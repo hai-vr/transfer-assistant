@@ -24,6 +24,7 @@
             "path": "경로",
             "perform_analysis": "분석 실행",
             "prefab_source": "프리팹 소스",
+            "prefab_model": "프리팹 모델",
             "prefabs": "프리팹",
             "prepare_export_assets": "내보내기 준비... ({0} 에셋)",
             "reset_to_defaults": "기본값으로 재설정",

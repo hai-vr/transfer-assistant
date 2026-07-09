@@ -241,7 +241,8 @@ namespace Hai.TransferAssistant
             Deepview deepview = null;
             var isDeepviewGameObject = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out deepview);
             var isAnyPrefabInstanceRoot = isDeepviewGameObject && deepview.isAnyPrefabInstanceRoot;
-            var isPrefabDiskAsset = isDeepviewGameObject && deepview.isAssetOnDisk;
+            var isPrefabDiskAsset = isDeepviewGameObject && deepview.isAssetOnDisk && deepview.isMainAsset;
+            var isPrefabModel = isDeepviewGameObject && deepview.isPrefabModelDiskReference;
             var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(item.Target.GetType());
 
             if (isDeepviewGameObject && deepview.isEditorOnly)
@@ -249,10 +250,20 @@ namespace Hai.TransferAssistant
                 var labelContent = new GUIContent(EditorOnlyLabel);
                 var labelWidth = EditorStyles.miniLabel.CalcSize(labelContent).x;
                 objectFieldRect.width -= labelWidth + 4;
-                
                 var editorOnlyLabelRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, labelWidth, objectFieldRect.height);
                 TransferAssistantWindow.ColoredBackgroundVoid(true, TransferAssistantWindow.EditorOnlyColor, () =>
                     EditorGUI.LabelField(editorOnlyLabelRect, labelContent, EditorStyles.miniLabel));
+            }
+            
+            if (isPrefabDiskAsset || isAnyPrefabInstanceRoot)
+            {
+                var prefabLabelContent = new GUIContent(_localize.Text(isPrefabModel ? Phrases.prefab_model : isPrefabDiskAsset ? Phrases.prefab_source : Phrases.prefab_instance));
+                var prefabLabelWidth = EditorStyles.miniLabel.CalcSize(prefabLabelContent).x;
+                objectFieldRect.width -= prefabLabelWidth + 4;
+                var prefabLabelRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, prefabLabelWidth, objectFieldRect.height);
+                TransferAssistantWindow.ColoredBackgroundVoid(true, isPrefabDiskAsset ? TransferAssistantWindow.PersistentGameObjectColor : TransferAssistantWindow.PrefabInstanceRootGameObjectColor, () =>
+                    EditorGUI.LabelField(prefabLabelRect, prefabLabelContent, EditorStyles.miniLabel)
+                );
             }
             
             var isMatch = !string.IsNullOrEmpty(_customSearchString) && DoesItemMatchSearch(item, _customSearchString);

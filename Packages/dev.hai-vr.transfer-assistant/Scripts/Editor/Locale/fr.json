@@ -24,6 +24,7 @@
             "path": "Chemin",
             "perform_analysis": "Effectuer l'analyse",
             "prefab_source": "Source du Prefab",
+            "prefab_model": "Modèle Prefab",
             "prefabs": "Prefabs",
             "prepare_export_assets": "Préparer l'export... ({0} assets)",
             "reset_to_defaults": "Réinitialiser aux valeurs par défaut",
@@ -63,7 +64,8 @@
             "reason_IsDriveByAsset": "Asset adjacent",
             "reason_IsObjectReference": "Contenu dans SerializedObject",
             "reason_IsComponent": "Composant",
-            "already_shown": "(Déjà affiché)"
+            "already_shown": "(Déjà affiché)",
+            "prefab_instance": "Instance du Prefab"
         },
         "enums": {
         }

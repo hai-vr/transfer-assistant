@@ -20,6 +20,7 @@ namespace Hai.TransferAssistant
         public const string path = nameof(path);
         public const string perform_analysis = nameof(perform_analysis);
         public const string prefab_source = nameof(prefab_source);
+        public const string prefab_model = nameof(prefab_model);
         public const string prefabs = nameof(prefabs);
         public const string prepare_export_assets = nameof(prepare_export_assets);
         public const string reset_to_defaults = nameof(reset_to_defaults);
@@ -64,5 +65,6 @@ namespace Hai.TransferAssistant
         public const string reason_IsObjectReference = nameof(reason_IsObjectReference);
         public const string reason_IsComponent = nameof(reason_IsComponent);
         public const string already_shown = nameof(already_shown);
+        public const string prefab_instance = nameof(prefab_instance);
     }
 }

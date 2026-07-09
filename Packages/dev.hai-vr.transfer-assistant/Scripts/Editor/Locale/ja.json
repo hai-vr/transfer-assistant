@@ -24,6 +24,7 @@
             "path": "パス",
             "perform_analysis": "分析を実行",
             "prefab_source": "Prefab ソース",
+            "prefab_model": "Prefab モデル",
             "prefabs": "Prefab",
             "prepare_export_assets": "エクスポートの準備... ({0} 個のアセット)",
             "reset_to_defaults": "デフォルトにリセット",
@@ -64,7 +65,8 @@
             "reason_IsDriveByAsset": "ついでにあるアセット",
             "reason_IsObjectReference": "SerializedObject 内に含まれる",
             "reason_IsComponent": "コンポーネント",
-            "already_shown": "(表示済み)"
+            "already_shown": "(表示済み)",
+            "prefab_instance": "Prefab インスタンス"
         },
         "enums": {
         }

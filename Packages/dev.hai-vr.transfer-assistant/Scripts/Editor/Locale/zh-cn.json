@@ -24,6 +24,7 @@
             "path": "路径",
             "perform_analysis": "执行分析",
             "prefab_source": "Prefab 源",
+            "prefab_model": "Prefab 模型",
             "prefabs": "Prefab",
             "prepare_export_assets": "准备导出... ({0} 个资源)",
             "reset_to_defaults": "重置为默认值",
@@ -64,7 +65,8 @@
             "reason_IsDriveByAsset": "随航资源",
             "reason_IsObjectReference": "包含在 SerializedObject 中",
             "reason_IsComponent": "组件",
-            "already_shown": "(已显示)"
+            "already_shown": "(已显示)",
+            "prefab_instance": "Prefab 实例"
         },
         "enums": {
         }

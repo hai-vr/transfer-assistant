@@ -194,7 +194,8 @@ namespace Hai.TransferAssistant
                     dependsOn = filteredDependsOn,
                     isDependedBy = filteredIsDependedBy,
                     isBoring = isBoring,
-                    isEditorOnly = IsAnyEditorOnly(asset)
+                    isEditorOnly = IsAnyEditorOnly(asset),
+                    isPrefabModelDiskReference = isDiskAsset && PrefabUtility.IsPartOfModelPrefab(asset) && isMainAsset,
                 });
             }
 
@@ -359,6 +360,7 @@ namespace Hai.TransferAssistant
                     isDeadEnd = current.isDeadEnd,
                     isBoring = current.isBoring,
                     isEditorOnly = current.isEditorOnly,
+                    isPrefabModelDiskReference = current.isPrefabModelDiskReference,
                 });
 
                 var ttype = asset.GetType();
@@ -414,6 +416,7 @@ namespace Hai.TransferAssistant
         public bool isBoring;
         public bool isEditorOnly;
         public bool isAnyPrefabInstanceRoot;
+        public bool isPrefabModelDiskReference;
     }
     
     internal class DeepviewDependency

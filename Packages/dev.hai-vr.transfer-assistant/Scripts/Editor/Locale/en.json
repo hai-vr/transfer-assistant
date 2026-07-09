@@ -24,6 +24,7 @@
             "path": "Path",
             "perform_analysis": "Perform analysis",
             "prefab_source": "Prefab Source",
+            "prefab_model": "Prefab Model",
             "prefabs": "Prefabs",
             "prepare_export_assets": "Prepare Export... ({0} assets)",
             "reset_to_defaults": "Reset to defaults",
@@ -64,7 +65,8 @@
             "reason_IsDriveByAsset": "Drive-by Asset",
             "reason_IsObjectReference": "Contained within SerializedObject",
             "reason_IsComponent": "Component",
-            "already_shown": "(Already shown)"
+            "already_shown": "(Already shown)",
+            "prefab_instance": "Prefab Instance"
         },
         "enums": {
         }
