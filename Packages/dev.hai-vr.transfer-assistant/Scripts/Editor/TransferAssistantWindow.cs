@@ -663,7 +663,7 @@ namespace Hai.TransferAssistant
                 _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
             }
 
-            _visualizeTreeBuilder.MarkVisible();
+            _visualizeTreeBuilder.MarkVisible(_search);
         }
 
         private void DrawDependencyList(string phrases, Object asset, float halfWidth, Dictionary<Object, Deepview> deepviewByAsset, Func<Deepview, List<DeepviewDependency>> dependencyExtractor, bool isDeep)

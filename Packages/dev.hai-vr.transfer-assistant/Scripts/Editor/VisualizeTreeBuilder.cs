@@ -23,7 +23,7 @@ namespace Hai.TransferAssistant
             _treeView = null;
         }
 
-        public void MarkVisible()
+        public void MarkVisible(string searchString)
         {
             if (_analysis == null) return;
 
@@ -35,6 +35,11 @@ namespace Hai.TransferAssistant
                 _treeView.ExpandAll();
             }
 
+            if (_treeView.CustomSearchString != searchString)
+            {
+                _treeView.CustomSearchString = searchString;
+            }
+
             var rect = EditorGUILayout.GetControlRect(false, GUILayout.ExpandHeight(true), GUILayout.MinHeight(200));
             _treeView.OnGUI(rect);
         }
@@ -44,6 +49,24 @@ namespace Hai.TransferAssistant
     {
         private readonly TransferAssistantAnalysis _analysis;
         private readonly HaiEFLoc _localize;
+        private string _customSearchString;
+
+        public string CustomSearchString
+        {
+            get => _customSearchString;
+            set
+            {
+                if (_customSearchString != value)
+                {
+                    _customSearchString = value;
+                    Reload();
+                    if (!string.IsNullOrEmpty(_customSearchString))
+                    {
+                        ExpandAll();
+                    }
+                }
+            }
+        }
 
         public DependencyTreeView(TreeViewState state, TransferAssistantAnalysis analysis, HaiEFLoc localize) : base(state)
         {
@@ -102,6 +125,84 @@ namespace Hai.TransferAssistant
             }
         }
 
+        protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
+        {
+            if (string.IsNullOrEmpty(_customSearchString)) return base.BuildRows(root);
+
+            var matchingItems = new HashSet<TreeViewItem>();
+            
+            FindMatchesAndRelatives(root, _customSearchString, matchingItems);
+
+            var filteredRows = new List<TreeViewItem>();
+            if (root.hasChildren)
+            {
+                AddVisibleItems(root.children, matchingItems, filteredRows);
+            }
+
+            return filteredRows;
+        }
+
+        private void FindMatchesAndRelatives(TreeViewItem item, string search, HashSet<TreeViewItem> matchingItems)
+        {
+            if (item.id != 0 && DoesItemMatchSearch(item, search))
+            {
+                AddMatchAndAncestors(item, matchingItems);
+                AddDescendants(item, matchingItems);
+            }
+
+            if (item.hasChildren)
+            {
+                foreach (var child in item.children)
+                {
+                    FindMatchesAndRelatives(child, search, matchingItems);
+                }
+            }
+        }
+
+        private void AddVisibleItems(IList<TreeViewItem> items, HashSet<TreeViewItem> matchingItems, List<TreeViewItem> filteredRows)
+        {
+            foreach (var item in items)
+            {
+                if (matchingItems.Contains(item))
+                {
+                    filteredRows.Add(item);
+                    if (item.hasChildren)
+                    {
+                        AddVisibleItems(item.children, matchingItems, filteredRows);
+                    }
+                }
+            }
+        }
+
+        private bool DoesItemMatchSearch(TreeViewItem item, string search)
+        {
+            return item.displayName.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void AddMatchAndAncestors(TreeViewItem item, HashSet<TreeViewItem> matchingItems)
+        {
+            var current = item;
+            while (current != null && current.id != 0) // id 0 is root
+            {
+                if (!matchingItems.Add(current)) break;
+                current = current.parent;
+            }
+        }
+
+        private void AddDescendants(TreeViewItem item, HashSet<TreeViewItem> matchingItems)
+        {
+            if (item.hasChildren)
+            {
+                foreach (var child in item.children)
+                {
+                    if (matchingItems.Add(child))
+                    {
+                        AddDescendants(child, matchingItems);
+                    }
+                }
+            }
+        }
+
         protected override void RowGUI(RowGUIArgs args)
         {
             var item = (DependencyTreeViewItem)args.item;
@@ -138,12 +239,25 @@ namespace Hai.TransferAssistant
             
             var isPersistentGameObject = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out var that) && that.isMainAsset;
             var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(item.Target.GetType());
+            
+            var isMatch = !string.IsNullOrEmpty(_customSearchString) && DoesItemMatchSearch(item, _customSearchString);
+            var prevFontStyle = EditorStyles.objectField.fontStyle;
+            if (isMatch)
+            {
+                EditorStyles.objectField.fontStyle = FontStyle.Bold;
+            }
+            
             EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPersistentGameObject);
             TransferAssistantWindow.ColoredBackgroundVoid(
                 isPersistentGameObject || isComponentOrStateMachineBehaviour,
                 isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor : TransferAssistantWindow.PersistentGameObjectColor,
                 () => EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false));
             EditorGUI.EndDisabledGroup();
+            
+            if (isMatch)
+            {
+                EditorStyles.objectField.fontStyle = prevFontStyle;
+            }
         }
     }
 
