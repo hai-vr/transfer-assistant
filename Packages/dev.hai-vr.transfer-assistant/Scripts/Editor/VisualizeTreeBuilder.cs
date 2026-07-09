@@ -197,7 +197,7 @@ namespace Hai.TransferAssistant
                 if (matchingItems.Contains(item))
                 {
                     filteredRows.Add(item);
-                    if (item.hasChildren)
+                    if (item.hasChildren && IsExpanded(item.id))
                     {
                         AddVisibleItems(item.children, matchingItems, filteredRows);
                     }
@@ -262,6 +262,10 @@ namespace Hai.TransferAssistant
                 if (newExpanded != isExpanded)
                 {
                     SetExpanded(args.item.id, newExpanded);
+                    if (!string.IsNullOrEmpty(_customSearchString) || _customSearchObject != null)
+                    {
+                        Reload();
+                    }
                 }
             }
 
