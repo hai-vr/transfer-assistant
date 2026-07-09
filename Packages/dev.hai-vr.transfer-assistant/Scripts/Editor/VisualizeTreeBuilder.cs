@@ -239,12 +239,12 @@ namespace Hai.TransferAssistant
             }
 
             Deepview deepview = null;
-            var isDeepview = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out deepview);
-            var isPersistentGameObject = isDeepview && deepview.isMainAsset;
-            var isPrefabInstanceRoot = isDeepview && deepview.isAnyPrefabInstanceRoot;
+            var isDeepviewGameObject = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out deepview);
+            var isAnyPrefabInstanceRoot = isDeepviewGameObject && deepview.isAnyPrefabInstanceRoot;
+            var isPrefabDiskAsset = isDeepviewGameObject && deepview.isAssetOnDisk;
             var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(item.Target.GetType());
 
-            if (isDeepview && deepview.isEditorOnly)
+            if (isDeepviewGameObject && deepview.isEditorOnly)
             {
                 var labelContent = new GUIContent(EditorOnlyLabel);
                 var labelWidth = EditorStyles.miniLabel.CalcSize(labelContent).x;
@@ -262,12 +262,12 @@ namespace Hai.TransferAssistant
                 EditorStyles.objectField.fontStyle = FontStyle.Bold;
             }
             
-            EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPersistentGameObject);
+            EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPrefabDiskAsset);
             TransferAssistantWindow.ColoredBackgroundVoid(
-                isPersistentGameObject || isComponentOrStateMachineBehaviour || isPrefabInstanceRoot,
+                isAnyPrefabInstanceRoot || isComponentOrStateMachineBehaviour || isPrefabDiskAsset,
                 isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor :
-                    isPrefabInstanceRoot ? TransferAssistantWindow.PrefabInstanceRootGameObjectColor :
-                    TransferAssistantWindow.PersistentGameObjectColor,
+                    isPrefabDiskAsset ? TransferAssistantWindow.PersistentGameObjectColor :
+                    TransferAssistantWindow.PrefabInstanceRootGameObjectColor,
                 () => EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false));
             EditorGUI.EndDisabledGroup();
             
