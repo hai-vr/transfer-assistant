@@ -348,14 +348,7 @@ namespace Hai.TransferAssistant
             rect.x += 20f;
             rect.width -= 20f;
 
-            base.RowGUI(new RowGUIArgs
-            {
-                item = item,
-                label = item.displayName,
-                rowRect = rect,
-                selected = args.selected,
-                focused = args.focused,
-            });
+            EditorGUI.LabelField(rect, item.displayName);
         }
 
         private void SetSelectionRecursive(TreeViewItem item, bool selected)
