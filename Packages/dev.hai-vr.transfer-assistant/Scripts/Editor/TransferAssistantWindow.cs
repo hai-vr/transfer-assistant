@@ -22,6 +22,8 @@ namespace Hai.TransferAssistant
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
         private const float SidebarWidth = 250;
+        
+        private Texture _searchIcon;
 
         private static readonly HashSet<string> AfterCullingTypeFullNamesDefault = new() 
         {
@@ -411,6 +413,7 @@ namespace Hai.TransferAssistant
                 label += localize.Format(Phrases.culled_suffix, count - culledCount);
             }
 
+            EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
             var newState = EditorGUILayout.ToggleLeft(label, !isCulled);
             if (EditorGUI.EndChangeCheck())
@@ -432,6 +435,14 @@ namespace Hai.TransferAssistant
                     }
                 }
             }
+            _searchIcon ??= EditorGUIUtility.IconContent("Search Icon").image;
+            if (GUILayout.Button(_searchIcon, GUILayout.Width(25), GUILayout.Height(EditorGUIUtility.singleLineHeight)))
+            {
+                var searchTerm = "t:" + ttype.FullName;
+                _search = _search == searchTerm ? "" : searchTerm;
+                _searchObject = null;
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private void LayoutVisualizeTree()

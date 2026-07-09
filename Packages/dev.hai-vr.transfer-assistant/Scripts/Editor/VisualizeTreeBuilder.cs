@@ -63,7 +63,7 @@ namespace Hai.TransferAssistant
         private Object _customSearchObject;
 
         public Action<Object> OnSearchObjectRequested;
-        private Texture searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
+        private readonly Texture _searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
 
         public string CustomSearchString
         {
@@ -211,7 +211,14 @@ namespace Hai.TransferAssistant
             {
                 return item is DependencyTreeViewItem dependencyItem && dependencyItem.Target == _customSearchObject;
             }
-            return !string.IsNullOrEmpty(_customSearchString) && item.displayName.IndexOf(_customSearchString, System.StringComparison.OrdinalIgnoreCase) >= 0;
+
+            if (string.IsNullOrEmpty(_customSearchString)) return false;
+            if (_customSearchString.StartsWith("t:"))
+            {
+                return item is DependencyTreeViewItem dependencyItem && dependencyItem.Target.GetType().FullName == _customSearchString.Substring(2);
+            }
+            
+            return item.displayName.IndexOf(_customSearchString, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void AddMatchAndAncestors(TreeViewItem item, HashSet<TreeViewItem> matchingItems)
@@ -266,7 +273,7 @@ namespace Hai.TransferAssistant
                 var buttonWidth = 25;
                 objectFieldRect.width -= buttonWidth + 4;
                 var buttonRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, buttonWidth, objectFieldRect.height);
-                if (GUI.Button(buttonRect, searchIcon, EditorStyles.miniButton))
+                if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
                 {
                     OnSearchObjectRequested?.Invoke(item.Target);
                 }
