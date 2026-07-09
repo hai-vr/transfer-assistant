@@ -369,10 +369,10 @@ namespace Hai.TransferAssistant
             {
                 _afterCullingTypeFullNames.Clear();
                 _afterCullingTypeFullNames.UnionWith(AfterCullingTypeFullNamesDefault);
-                _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
                 _includeEditorOnly = true;
                 _includeHiddenInPrefabs = false;
                 SavePrefs();
+                ScheduleAnalysis();
             }
         }
 
