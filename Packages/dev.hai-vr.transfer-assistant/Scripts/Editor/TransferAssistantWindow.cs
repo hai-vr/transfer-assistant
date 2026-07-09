@@ -22,9 +22,13 @@ namespace Hai.TransferAssistant
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
         private const float SidebarWidth = 250;
+
+        public Object target;
+        public Object[] targets = Array.Empty<Object>();
+        public string search = "";
+        public Object searchObject;
         
         private Texture _searchIcon;
-
         private static readonly HashSet<string> AfterCullingTypeFullNamesDefault = new() 
         {
             typeof(MonoScript).FullName,
@@ -32,17 +36,12 @@ namespace Hai.TransferAssistant
             typeof(ComputeShader).FullName,
             typeof(DefaultAsset).FullName,
         };
-
-        public Object target;
+        
         private TargetMode _targetMode;
-        public Object[] targets;
 
         private HashSet<string> _afterCullingTypeFullNames = AfterCullingTypeFullNamesDefault.ToHashSet();
         private bool _includeEditorOnly = true;
         private bool _includeHiddenInPrefabs = false;
-
-        private string _search = "";
-        private Object _searchObject;
 
         private bool _analysisScheduled;
         private TransferAssistantAnalysis _analysis;
@@ -374,18 +373,18 @@ namespace Hai.TransferAssistant
             localize.LabelField(Phrases.exploration, EditorStyles.boldLabel);
             localize.HelpBox(Phrases.msg_will_not_affect_export, MessageType.None);
             EditorGUILayout.BeginHorizontal();
-            var prevSearch = _search;
-            _search = EditorGUILayout.TextField(localize.Text(Phrases.search), prevSearch);
-            if (prevSearch != _search)
+            var prevSearch = search;
+            search = EditorGUILayout.TextField(localize.Text(Phrases.search), prevSearch);
+            if (prevSearch != search)
             {
-                _searchObject = null;
+                searchObject = null;
             }
-            _searchObject = EditorGUILayout.ObjectField(_searchObject, typeof(Object), true);
-            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(_search) && _searchObject == null);
+            searchObject = EditorGUILayout.ObjectField(searchObject, typeof(Object), true);
+            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(search) && searchObject == null);
             if (GUILayout.Button("×", GUILayout.Width(20)))
             {
-                _search = "";
-                _searchObject = null;
+                search = "";
+                searchObject = null;
             }
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
@@ -439,8 +438,8 @@ namespace Hai.TransferAssistant
             if (GUILayout.Button(_searchIcon, GUILayout.Width(25), GUILayout.Height(EditorGUIUtility.singleLineHeight)))
             {
                 var searchTerm = "t:" + ttype.FullName;
-                _search = _search == searchTerm ? "" : searchTerm;
-                _searchObject = null;
+                search = search == searchTerm ? "" : searchTerm;
+                searchObject = null;
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -452,16 +451,16 @@ namespace Hai.TransferAssistant
                 _visualizeTreeBuilder = new VisualizeTreeBuilder(_localize);
                 _visualizeTreeBuilder.OnSearchObjectRequested = obj =>
                 {
-                    _searchObject = _searchObject == obj ? null : obj;
+                    searchObject = searchObject == obj ? null : obj;
                 };
                 _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
                 _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
             }
 
-            _visualizeTreeBuilder.MarkVisible(_search, _searchObject);
+            _visualizeTreeBuilder.MarkVisible(search, searchObject);
         }
 
-        private void ScheduleAnalysis()
+        public void ScheduleAnalysis()
         {
             if (_analysisScheduled) return;
             _analysisScheduled = true;

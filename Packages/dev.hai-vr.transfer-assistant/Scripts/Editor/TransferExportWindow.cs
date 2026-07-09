@@ -162,6 +162,7 @@ namespace Hai.TransferAssistant
         private TypeCount[] _cachedTypeCounts;
         private int _nextId = 1;
         private string[] _assetPaths;
+        private readonly Texture _searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
 
         public struct TypeCount
         {
@@ -320,6 +321,21 @@ namespace Hai.TransferAssistant
 
             rect.x += 20f;
             rect.width -= 20f;
+
+            if (_assetPathSet.Contains(path))
+            {
+                var buttonWidth = 25;
+                rect.width -= buttonWidth + 4;
+                var buttonRect = new Rect(rect.xMax + 4, rect.y, buttonWidth, rect.height);
+                if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
+                {
+                    var window = EditorWindow.GetWindow<TransferAssistantWindow>();
+                    if (window != null)
+                    {
+                        window.searchObject = AssetDatabase.LoadMainAssetAtPath(path);
+                    }
+                }
+            }
         
             var iconRect = rect;
             iconRect.width = 16f;
