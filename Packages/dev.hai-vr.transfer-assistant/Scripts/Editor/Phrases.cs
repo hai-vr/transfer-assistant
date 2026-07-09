@@ -14,7 +14,7 @@ namespace Hai.TransferAssistant
         public const string hide_items = nameof(hide_items);
         public const string instantiated_in = nameof(instantiated_in);
         public const string is_depended_by = nameof(is_depended_by);
-        public const string msg_not_prefab_asset = nameof(msg_not_prefab_asset);
+        public const string msg_scene_objects_selected = nameof(msg_scene_objects_selected);
         public const string msg_will_not_affect_export = nameof(msg_will_not_affect_export);
         public const string path = nameof(path);
         public const string perform_analysis = nameof(perform_analysis);
@@ -25,11 +25,9 @@ namespace Hai.TransferAssistant
         public const string search = nameof(search);
         public const string target = nameof(target);
         public const string targets = nameof(targets);
-        public const string target_mode = nameof(target_mode);
         public const string target_mode_single = nameof(target_mode_single);
         public const string target_mode_multiple = nameof(target_mode_multiple);
         public const string target_mode_current_scenes = nameof(target_mode_current_scenes);
-        public const string traversal = nameof(traversal);
         public const string types = nameof(types);
         public const string components = nameof(components);
         public const string options = nameof(options);

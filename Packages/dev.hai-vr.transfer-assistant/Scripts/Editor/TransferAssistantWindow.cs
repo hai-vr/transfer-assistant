@@ -169,7 +169,29 @@ namespace Hai.TransferAssistant
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUI.BeginDisabledGroup((_targetMode == TargetMode.SingleTarget && target == null) || _analysisScheduled);
+            var invalid = _targetMode switch
+            {
+                TargetMode.SingleTarget => target == null,
+                TargetMode.MultipleTargets => targets == null || targets.Length == 0,
+                TargetMode.CurrentScenes => false,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            if (!invalid)
+            {
+                var usesSceneObject = _targetMode switch
+                {
+                    TargetMode.SingleTarget => !EditorUtility.IsPersistent(target),
+                    TargetMode.MultipleTargets => targets.Any(o => !EditorUtility.IsPersistent(o)),
+                    TargetMode.CurrentScenes => false,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                if (usesSceneObject)
+                {
+                    localize.HelpBox(Phrases.msg_scene_objects_selected, MessageType.Warning);
+                }
+            }
+            
+            EditorGUI.BeginDisabledGroup(invalid || _analysisScheduled);
             if (GUILayout.Button(_analysisScheduled ? localize.Text(Phrases.analysis_in_progress) : localize.Text(Phrases.perform_analysis)))
             {
                 ScheduleAnalysis();
@@ -203,10 +225,6 @@ namespace Hai.TransferAssistant
                     TransferExportWindow.ShowWindow(allRelevantAssets, _analysis.AfterCullingDataDeepviews.Keys.ToList());
                 }
 
-                // if (target != null && !_analysis.IsTargetAnAsset)
-                // {
-                    // localize.HelpBox(Phrases.msg_not_prefab_asset, MessageType.Warning);
-                // }
                 EditorGUI.EndDisabledGroup();
                 
                 EditorGUILayout.Space();
