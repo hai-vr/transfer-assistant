@@ -327,8 +327,8 @@ namespace Hai.TransferAssistant
                     () =>
                     {
                         EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPrefabDiskAsset);
-                        EditorGUI.EndDisabledGroup();
                         EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false);
+                        EditorGUI.EndDisabledGroup();
                     });
             }
             finally
