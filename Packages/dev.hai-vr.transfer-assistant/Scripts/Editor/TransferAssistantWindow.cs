@@ -17,7 +17,6 @@ namespace Hai.TransferAssistant
         
         private const string PrefsPrefix = "Hai.TransferAssistant.";
         private const string AfterCullingTypeFullNamesPrefsKey = PrefsPrefix + "AfterCullingTypeFullNames";
-        private const string HideItemsFilterPrefsKey = PrefsPrefix + "HideItemsFilter";
         private const string IncludeEditorOnlyPrefsKey = PrefsPrefix + "IncludeEditorOnly";
         private const string IncludeHiddenInPrefabsPrefsKey = PrefsPrefix + "IncludeHiddenInPrefabs";
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
@@ -37,21 +36,16 @@ namespace Hai.TransferAssistant
         public Object[] targets;
 
         private HashSet<string> _afterCullingTypeFullNames = AfterCullingTypeFullNamesDefault.ToHashSet();
-        private HideItemsFilter _hideItemsFilter = HideItemsFilter.ShowEverything;
         private bool _includeEditorOnly = true;
         private bool _includeHiddenInPrefabs = false;
 
         private string _search = "";
         private string _lastSearch;
-        private int _tabIndex;
 
         private bool _analysisScheduled;
         private TransferAssistantAnalysis _analysis;
         
-        private Vector2 _scrollPos;
         private Vector2 _sidebarScrollPos;
-        private readonly HashSet<Type> _foldoutTypeGroups = new();
-        private readonly HashSet<Type> _foldoutDeepTraversalTypeGroups = new();
 
         private List<Type> _cachedComponents = new();
         private List<Type> _cachedNonComponents = new();
@@ -78,10 +72,6 @@ namespace Hai.TransferAssistant
         private void OnEnable()
         {
             _analysis = new TransferAssistantAnalysis();
-            if (EditorPrefs.HasKey(HideItemsFilterPrefsKey))
-            {
-                _hideItemsFilter = (HideItemsFilter)EditorPrefs.GetInt(HideItemsFilterPrefsKey);
-            }
 
             if (EditorPrefs.HasKey(AfterCullingTypeFullNamesPrefsKey))
             {
@@ -107,7 +97,6 @@ namespace Hai.TransferAssistant
 
         private void SavePrefs()
         {
-            EditorPrefs.SetInt(HideItemsFilterPrefsKey, (int)_hideItemsFilter);
             EditorPrefs.SetString(AfterCullingTypeFullNamesPrefsKey, string.Join(",", _afterCullingTypeFullNames));
             EditorPrefs.SetBool(IncludeEditorOnlyPrefsKey, _includeEditorOnly);
             EditorPrefs.SetInt(TargetModePrefsKey, (int)_targetMode);
@@ -399,54 +388,11 @@ namespace Hai.TransferAssistant
 
             if (_analysis.DataPrefabObjectToInstances != null)
             {
-                _tabIndex = GUILayout.Toolbar(_tabIndex, new[]
-                {
-                    localize.Text(Phrases.dependencies),
-                    localize.Text(Phrases.prefabs),
-                    localize.Text(Phrases.types),
-                    localize.Text(Phrases.tree_view)
-                });
-
-                if (_tabIndex != 3)
-                {
-                    _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-                }
-
-                switch (_tabIndex)
-                {
-                    case 0: LayoutVisualizeDeepTraversal(); break;
-                    case 1: LayoutVisualizePrefabs(); break;
-                    case 2: LayoutVisualizeTypes(); break;
-                    case 3: LayoutVisualizeTree(); break;
-                }
-
-                if (_tabIndex != 3)
-                {
-                    EditorGUILayout.EndScrollView();
-                }
+                LayoutVisualizeTree();
             }
 
             localize.Selector(() => _localize = NewLoc());
             EditorGUILayout.EndVertical();
-        }
-
-        private void DisplayHideItemsFilter()
-        {
-            var newHideItemsFilter = (HideItemsFilter)EditorGUILayout.Popup(
-                new GUIContent(localize.Text(Phrases.hide_items)),
-                (int)_hideItemsFilter,
-                new[]
-                {
-                    localize.Text(Phrases.hide_items_show_everything),
-                    localize.Text(Phrases.hide_items_hide_leaf_with_one_parent),
-                    localize.Text(Phrases.hide_items_hide_all_leaf)
-                }
-            );
-            if (newHideItemsFilter != _hideItemsFilter)
-            {
-                _hideItemsFilter = newHideItemsFilter;
-                SavePrefs();
-            }
         }
 
         private void LayoutTypeToggle(Type ttype)
@@ -486,175 +432,6 @@ namespace Hai.TransferAssistant
             }
         }
 
-        private void LayoutVisualizePrefabs()
-        {
-            if (_analysis.DataPrefabObjectToInstances != null)
-            {
-                var filterLower = _search.ToLower();
-                var isFilterEmpty = string.IsNullOrEmpty(_search);
-
-                foreach (var prefabObjectToInstance in _analysis.DataPrefabObjectToInstances)
-                {
-                    var source = prefabObjectToInstance.Key;
-                    if (_analysis.AfterCullingDataDeepviews != null && !_analysis.AfterCullingDataDeepviews.ContainsKey(source)) continue;
-
-                    var instances = prefabObjectToInstance.Value;
-
-                    var sourceMatches = isFilterEmpty || (source != null && source.name.ToLower().Contains(filterLower));
-                    var matchingInstances = instances
-                        .Where(instance => instance != null && (isFilterEmpty || instance.name.ToLower().Contains(filterLower)))
-                        .ToList();
-
-                    if (!sourceMatches && matchingInstances.Count == 0) continue;
-
-                    var instancesToShow = sourceMatches ? instances.ToList() : matchingInstances;
-
-                    EditorGUILayout.BeginVertical("GroupBox");
-                    EditorGUILayout.ObjectField(localize.Text(Phrases.prefab_source), source, typeof(GameObject), false);
-                    EditorGUILayout.TextField(localize.Text(Phrases.path), AssetDatabase.GetAssetPath(source), EditorStyles.label);
-
-                    foreach (var instance in instancesToShow)
-                    {
-                        EditorGUILayout.ObjectField(localize.Text(Phrases.instantiated_in), instance, typeof(GameObject), true);
-                    }
-
-                    EditorGUILayout.EndVertical();
-                }
-            }
-        }
-
-        private void LayoutVisualizeTypes()
-        {
-            if (_analysis.AfterCullingDataDeepviews != null)
-            {
-                var filterLower = _search.ToLower();
-                var isFilterEmpty = string.IsNullOrEmpty(_search);
-
-                var typeToAssets = new Dictionary<Type, List<Object>>();
-                foreach (var asset in _analysis.AfterCullingDataDeepviews.Keys)
-                {
-                    if (asset == null) continue;
-                    if (!isFilterEmpty && !asset.name.ToLower().Contains(filterLower)) continue;
-
-                    var typeName = asset.GetType();
-                    if (!typeToAssets.ContainsKey(typeName))
-                    {
-                        typeToAssets[typeName] = new List<Object>();
-                    }
-                    typeToAssets[typeName].Add(asset);
-                }
-
-                var typeGroups = typeToAssets
-                    .Select(kvp => new { TType = kvp.Key, Assets = kvp.Value.OrderBy(o => o.name, StringComparer.InvariantCulture).ToList() })
-                    .OrderBy(group => group.TType.Name, StringComparer.InvariantCulture)
-                    .ToList();
-
-                foreach (var group in typeGroups)
-                {
-                    var friendlyTypeName = group.TType.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
-                    var isFoldedOut = _foldoutTypeGroups.Contains(group.TType);
-                    
-                    EditorGUILayout.BeginVertical("GroupBox");
-                    var nowFoldedOut = EditorGUILayout.Foldout(isFoldedOut, friendlyTypeName, true, EditorStyles.foldoutHeader);
-                    if (nowFoldedOut != isFoldedOut)
-                    {
-                        if (nowFoldedOut) _foldoutTypeGroups.Add(group.TType);
-                        else _foldoutTypeGroups.Remove(group.TType);
-                    }
-
-                    if (nowFoldedOut)
-                    {
-                        foreach (var asset in group.Assets)
-                        {
-                            EditorGUILayout.ObjectField(asset, typeof(Object), false);
-                        }
-                    }
-                    EditorGUILayout.EndVertical();
-                }
-            }
-        }
-
-        private void LayoutVisualizeDeepTraversal()
-        {
-            DisplayHideItemsFilter();
-            if (_analysis.AfterCullingDataDeepviews != null)
-            {
-                var filterLower = _search.ToLower();
-                var isFilterEmpty = string.IsNullOrEmpty(_search);
-
-                var typeToAssets = new Dictionary<Type, List<Object>>();
-                foreach (var (asset, deepview) in _analysis.AfterCullingDataDeepviews)
-                {
-                    if (asset == null) continue;
-                    if (deepview.isDeadEnd) continue;
-                    if (!isFilterEmpty && !asset.name.ToLower().Contains(filterLower)) continue;
-
-                    if (_hideItemsFilter != HideItemsFilter.ShowEverything)
-                    {
-                        var hasNoDependencies = deepview.dependsOn.Count == 0;
-                        if (hasNoDependencies)
-                        {
-                            if (_hideItemsFilter == HideItemsFilter.HideAllLeaf) continue;
-
-                            var isDependedByExactlyOne = deepview.isDependedBy.Count == 1;
-                            if (_hideItemsFilter == HideItemsFilter.HideLeafWithOneParent && isDependedByExactlyOne) continue;
-                        }
-                    }
-
-                    var ttype = asset.GetType();
-                    if (!typeToAssets.ContainsKey(ttype))
-                    {
-                        typeToAssets[ttype] = new List<Object>();
-                    }
-                    typeToAssets[ttype].Add(asset);
-                }
-
-                var typeGroups = typeToAssets
-                    .Select(typeToAsset => new { TType = typeToAsset.Key, Assets = typeToAsset.Value.OrderBy(o => o.name, StringComparer.InvariantCulture).ToList() })
-                    .OrderBy(group => TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(group.TType))
-                    .ThenBy(group => group.TType.Name, StringComparer.InvariantCulture)
-                    .ToList();
-
-                foreach (var group in typeGroups)
-                {
-                    var friendlyTypeName = group.TType.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : group.TType.Name;
-                    var isFoldedOut = _foldoutDeepTraversalTypeGroups.Contains(group.TType);
-
-                    EditorGUILayout.BeginVertical("GroupBox");
-                    var nowFoldedOut = ColoredBackground(TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(group.TType), ComponentlikeColor, () => EditorGUILayout.Foldout(isFoldedOut, friendlyTypeName, true, EditorStyles.foldoutHeader));
-                    if (nowFoldedOut != isFoldedOut)
-                    {
-                        if (nowFoldedOut) _foldoutDeepTraversalTypeGroups.Add(group.TType);
-                        else _foldoutDeepTraversalTypeGroups.Remove(group.TType);
-                    }
-
-                    if (nowFoldedOut)
-                    {
-                        foreach (var asset in group.Assets)
-                        {
-                            var deepview = _analysis.AfterCullingDataDeepviews[asset];
-                                
-                            EditorGUILayout.BeginVertical("GroupBox");
-                            EditorGUILayout.BeginHorizontal();
-                            ColoredBackgroundVoid(asset is Component, ComponentlikeColor, () => EditorGUILayout.LabelField(asset.GetType().Name, EditorStyles.boldLabel));
-                            ColoredBackgroundVoid(deepview.isEditorOnly, EditorOnlyColor, () => EditorGUILayout.ObjectField(asset, typeof(Object), false));
-                            EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.TextField(localize.Text(Phrases.path), AssetDatabase.GetAssetPath(asset), EditorStyles.label);
-
-                            EditorGUILayout.BeginHorizontal();
-                            var halfWidth = (EditorGUIUtility.currentViewWidth - SidebarWidth - 110) / 2;
-                            DrawDependencyList(Phrases.is_depended_by, asset, halfWidth, _analysis.AfterCullingDataDeepviews, dv => dv.isDependedBy, true);
-                            DrawDependencyList(Phrases.depends_on, asset, halfWidth, _analysis.AfterCullingDataDeepviews, dv => dv.dependsOn, true);
-                            EditorGUILayout.EndHorizontal();
-
-                            EditorGUILayout.EndVertical();
-                        }
-                    }
-                    EditorGUILayout.EndVertical();
-                }
-            }
-        }
-        
         private void LayoutVisualizeTree()
         {
             if (_visualizeTreeBuilder == null)
@@ -665,61 +442,6 @@ namespace Hai.TransferAssistant
             }
 
             _visualizeTreeBuilder.MarkVisible(_search);
-        }
-
-        private void DrawDependencyList(string phrases, Object asset, float halfWidth, Dictionary<Object, Deepview> deepviewByAsset, Func<Deepview, List<DeepviewDependency>> dependencyExtractor, bool isDeep)
-        {
-            EditorGUILayout.BeginVertical(GUILayout.Width(halfWidth));
-            localize.LabelField(phrases);
-            if (deepviewByAsset != null && deepviewByAsset.TryGetValue(asset, out var dv))
-            {
-                var dependencies = dependencyExtractor(dv);
-                foreach (var deepviewDependency in dependencies)
-                {
-                    var obj = deepviewDependency.item;
-                    if (isDeep)
-                    {
-                        EditorGUILayout.BeginHorizontal();
-                        ColoredBackgroundVoid(_analysis.DataDeepviews[obj].isEditorOnly, EditorOnlyColor, () => EditorGUILayout.ObjectField(obj, typeof(Object), false));
-                        if (deepviewDependency.persistentAsset != null && deepviewDependency.persistentAsset != deepviewDependency.item)
-                        {
-                            EditorGUILayout.LabelField("▶", GUILayout.Width(20));
-                            EditorGUILayout.ObjectField(deepviewDependency.persistentAsset, typeof(Object), false);
-                        }
-                        EditorGUILayout.EndHorizontal();
-                    }
-                    else
-                    {
-                        EditorGUILayout.ObjectField(obj, typeof(Object), false);
-                    }
-
-                    if (deepviewDependency.reason != TraversalReason.IsObjectReference)
-                    {
-                        var reasonText = deepviewDependency.reason switch
-                        {
-                            TraversalReason.IsRoot => localize.Text(Phrases.reason_IsRoot),
-                            TraversalReason.IsChildTransform => localize.Text(Phrases.reason_IsChildTransform),
-                            TraversalReason.IsPrefabSource => localize.Text(Phrases.reason_IsPrefabSource),
-                            TraversalReason.IsPropertyModificationOfPrefabInstance => localize.Text(Phrases.reason_IsPropertyModificationOfPrefabInstance),
-                            TraversalReason.IsDriveByAsset => localize.Text(Phrases.reason_IsDriveByAsset),
-                            TraversalReason.IsObjectReference => localize.Text(Phrases.reason_IsObjectReference),
-                            TraversalReason.IsComponent => localize.Text(Phrases.reason_IsComponent),
-                            _ => deepviewDependency.reason.ToString()
-                        };
-                        if (isDeep)
-                        {
-                            ColoredBackgroundVoid(obj != null && typeof(Component).IsAssignableFrom(obj.GetType()), ComponentlikeColor, () =>
-                                EditorGUILayout.LabelField($"({(obj != null ? obj.GetType().Name : "null")}) " + reasonText, EditorStyles.miniLabel));
-                        }
-                        else
-                        {
-                            EditorGUILayout.LabelField(reasonText, EditorStyles.miniLabel);
-                        }
-                    }
-                }
-            }
-
-            EditorGUILayout.EndVertical();
         }
 
         private void ScheduleAnalysis()
@@ -838,6 +560,21 @@ namespace Hai.TransferAssistant
                 GUI.color = col;
             }
         }
+
+        private string ToLocalizedReason(TraversalReason reason)
+        {
+            return reason switch
+            {
+                TraversalReason.IsRoot => localize.Text(Phrases.reason_IsRoot),
+                TraversalReason.IsChildTransform => localize.Text(Phrases.reason_IsChildTransform),
+                TraversalReason.IsPrefabSource => localize.Text(Phrases.reason_IsPrefabSource),
+                TraversalReason.IsPropertyModificationOfPrefabInstance => localize.Text(Phrases.reason_IsPropertyModificationOfPrefabInstance),
+                TraversalReason.IsDriveByAsset => localize.Text(Phrases.reason_IsDriveByAsset),
+                TraversalReason.IsObjectReference => localize.Text(Phrases.reason_IsObjectReference),
+                TraversalReason.IsComponent => localize.Text(Phrases.reason_IsComponent),
+                _ => reason.ToString()
+            };
+        }
     }
 
     public enum TargetMode
@@ -845,12 +582,5 @@ namespace Hai.TransferAssistant
         SingleTarget,
         MultipleTargets,
         CurrentScenes
-    }
-
-    internal enum HideItemsFilter
-    {
-        ShowEverything,
-        HideLeafWithOneParent,
-        HideAllLeaf
     }
 }

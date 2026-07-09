@@ -7,21 +7,14 @@ namespace Hai.TransferAssistant
         public const string culled_suffix = nameof(culled_suffix);
         public const string msg_checkboxes_affect_export = nameof(msg_checkboxes_affect_export);
         public const string culling = nameof(culling);
-        public const string dependencies = nameof(dependencies);
-        public const string depends_on = nameof(depends_on);
         public const string exploration = nameof(exploration);
         public const string export = nameof(export);
-        public const string hide_items = nameof(hide_items);
-        public const string instantiated_in = nameof(instantiated_in);
-        public const string is_depended_by = nameof(is_depended_by);
         public const string msg_scene_objects_selected = nameof(msg_scene_objects_selected);
         public const string msg_scenes_must_be_open = nameof(msg_scenes_must_be_open);
         public const string msg_will_not_affect_export = nameof(msg_will_not_affect_export);
-        public const string path = nameof(path);
         public const string perform_analysis = nameof(perform_analysis);
         public const string prefab_source = nameof(prefab_source);
         public const string prefab_model = nameof(prefab_model);
-        public const string prefabs = nameof(prefabs);
         public const string prepare_export_assets = nameof(prepare_export_assets);
         public const string reset_to_defaults = nameof(reset_to_defaults);
         public const string search = nameof(search);
@@ -30,8 +23,6 @@ namespace Hai.TransferAssistant
         public const string target_mode_single = nameof(target_mode_single);
         public const string target_mode_multiple = nameof(target_mode_multiple);
         public const string target_mode_current_scenes = nameof(target_mode_current_scenes);
-        public const string types = nameof(types);
-        public const string tree_view = nameof(tree_view);
         public const string components = nameof(components);
         public const string options = nameof(options);
         public const string include_editor_only = nameof(include_editor_only);
@@ -52,10 +43,6 @@ namespace Hai.TransferAssistant
         public const string expand_all = nameof(expand_all);
         public const string collapse_all = nameof(collapse_all);
         public const string window_title = nameof(window_title);
-
-        public const string hide_items_show_everything = nameof(hide_items_show_everything);
-        public const string hide_items_hide_leaf_with_one_parent = nameof(hide_items_hide_leaf_with_one_parent);
-        public const string hide_items_hide_all_leaf = nameof(hide_items_hide_all_leaf);
 
         public const string reason_IsRoot = nameof(reason_IsRoot);
         public const string reason_IsChildTransform = nameof(reason_IsChildTransform);
