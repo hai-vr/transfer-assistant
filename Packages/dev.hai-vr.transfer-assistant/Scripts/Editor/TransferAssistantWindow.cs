@@ -10,6 +10,10 @@ namespace Hai.TransferAssistant
 {
     public class TransferAssistantWindow : EditorWindow
     {
+        internal static readonly Color PersistentGameObjectColor = new(0.66f, 1f, 0.82f);
+        internal static readonly Color ComponentlikeColor = Color.yellow;
+        internal static readonly Color EditorOnlyColor = new(1f, 0.65f, 0.67f);
+        
         private const string PrefsPrefix = "Hai.TransferAssistant.";
         private const string AfterCullingTypeFullNamesPrefsKey = PrefsPrefix + "AfterCullingTypeFullNames";
         private const string HideItemsFilterPrefsKey = PrefsPrefix + "HideItemsFilter";
@@ -51,6 +55,7 @@ namespace Hai.TransferAssistant
         private List<Type> _cachedComponents = new();
         private List<Type> _cachedNonComponents = new();
         private List<ComponentGroup> _cachedComponentGroups = new();
+        private VisualizeTreeBuilder _visualizeTreeBuilder;
 
         private struct ComponentGroup
         {
@@ -340,11 +345,6 @@ namespace Hai.TransferAssistant
             EditorGUILayout.EndVertical();
         }
 
-        private static bool IsComponentOrStateMachineBehaviour(Type t)
-        {
-            return typeof(Component).IsAssignableFrom(t) || typeof(StateMachineBehaviour).IsAssignableFrom(t);
-        }
-
         private (List<T>, List<T>) PartitionBy<T>(IEnumerable<T> source, Func<T, bool> predicate)
         {
             var trueItems = new List<T>();
@@ -398,18 +398,31 @@ namespace Hai.TransferAssistant
 
             if (_analysis.DataPrefabObjectToInstances != null)
             {
-                _tabIndex = GUILayout.Toolbar(_tabIndex, new[] { localize.Text(Phrases.dependencies), localize.Text(Phrases.prefabs), localize.Text(Phrases.types) });
+                _tabIndex = GUILayout.Toolbar(_tabIndex, new[]
+                {
+                    localize.Text(Phrases.dependencies),
+                    localize.Text(Phrases.prefabs),
+                    localize.Text(Phrases.types),
+                    localize.Text(Phrases.tree_view)
+                });
 
-                _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+                if (_tabIndex != 3)
+                {
+                    _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+                }
 
                 switch (_tabIndex)
                 {
                     case 0: LayoutVisualizeDeepTraversal(); break;
                     case 1: LayoutVisualizePrefabs(); break;
                     case 2: LayoutVisualizeTypes(); break;
+                    case 3: LayoutVisualizeTree(); break;
                 }
 
-                EditorGUILayout.EndScrollView();
+                if (_tabIndex != 3)
+                {
+                    EditorGUILayout.EndScrollView();
+                }
             }
 
             localize.Selector(() => _localize = NewLoc());
@@ -442,7 +455,7 @@ namespace Hai.TransferAssistant
             var isCulled = _afterCullingTypeFullNames.Contains(ttype.FullName);
             var friendlyTypeName = ttype.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : ttype.Name;
 
-            var isComponentOrStateMachineBehaviour = IsComponentOrStateMachineBehaviour(ttype);
+            var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(ttype);
             var label = isComponentOrStateMachineBehaviour ? friendlyTypeName : $"{friendlyTypeName} ({culledCount} / {count})";
             if (!isComponentOrStateMachineBehaviour && culledCount < count && culledCount != 0)
             {
@@ -597,7 +610,7 @@ namespace Hai.TransferAssistant
 
                 var typeGroups = typeToAssets
                     .Select(typeToAsset => new { TType = typeToAsset.Key, Assets = typeToAsset.Value.OrderBy(o => o.name, StringComparer.InvariantCulture).ToList() })
-                    .OrderBy(group => IsComponentOrStateMachineBehaviour(group.TType))
+                    .OrderBy(group => TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(group.TType))
                     .ThenBy(group => group.TType.Name, StringComparer.InvariantCulture)
                     .ToList();
 
@@ -607,7 +620,7 @@ namespace Hai.TransferAssistant
                     var isFoldedOut = _foldoutDeepTraversalTypeGroups.Contains(group.TType);
 
                     EditorGUILayout.BeginVertical("GroupBox");
-                    var nowFoldedOut = ColoredBackground(IsComponentOrStateMachineBehaviour(group.TType), Color.yellow, () => EditorGUILayout.Foldout(isFoldedOut, friendlyTypeName, true, EditorStyles.foldoutHeader));
+                    var nowFoldedOut = ColoredBackground(TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(group.TType), ComponentlikeColor, () => EditorGUILayout.Foldout(isFoldedOut, friendlyTypeName, true, EditorStyles.foldoutHeader));
                     if (nowFoldedOut != isFoldedOut)
                     {
                         if (nowFoldedOut) _foldoutDeepTraversalTypeGroups.Add(group.TType);
@@ -622,8 +635,8 @@ namespace Hai.TransferAssistant
                                 
                             EditorGUILayout.BeginVertical("GroupBox");
                             EditorGUILayout.BeginHorizontal();
-                            ColoredBackgroundVoid(asset is Component, Color.yellow, () => EditorGUILayout.LabelField(asset.GetType().Name, EditorStyles.boldLabel));
-                            ColoredBackgroundVoid(deepview.isEditorOnly, Color.red, () => EditorGUILayout.ObjectField(asset, typeof(Object), false));
+                            ColoredBackgroundVoid(asset is Component, ComponentlikeColor, () => EditorGUILayout.LabelField(asset.GetType().Name, EditorStyles.boldLabel));
+                            ColoredBackgroundVoid(deepview.isEditorOnly, EditorOnlyColor, () => EditorGUILayout.ObjectField(asset, typeof(Object), false));
                             EditorGUILayout.EndHorizontal();
                             EditorGUILayout.TextField(localize.Text(Phrases.path), AssetDatabase.GetAssetPath(asset), EditorStyles.label);
 
@@ -640,6 +653,18 @@ namespace Hai.TransferAssistant
                 }
             }
         }
+        
+        private void LayoutVisualizeTree()
+        {
+            if (_visualizeTreeBuilder == null)
+            {
+                _visualizeTreeBuilder = new VisualizeTreeBuilder(_localize);
+                _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
+                _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
+            }
+
+            _visualizeTreeBuilder.MarkVisible();
+        }
 
         private void DrawDependencyList(string phrases, Object asset, float halfWidth, Dictionary<Object, Deepview> deepviewByAsset, Func<Deepview, List<DeepviewDependency>> dependencyExtractor, bool isDeep)
         {
@@ -654,7 +679,7 @@ namespace Hai.TransferAssistant
                     if (isDeep)
                     {
                         EditorGUILayout.BeginHorizontal();
-                        ColoredBackgroundVoid(_analysis.DataDeepviews[obj].isEditorOnly, Color.red, () => EditorGUILayout.ObjectField(obj, typeof(Object), false));
+                        ColoredBackgroundVoid(_analysis.DataDeepviews[obj].isEditorOnly, EditorOnlyColor, () => EditorGUILayout.ObjectField(obj, typeof(Object), false));
                         if (deepviewDependency.persistentAsset != null && deepviewDependency.persistentAsset != deepviewDependency.item)
                         {
                             EditorGUILayout.LabelField("▶", GUILayout.Width(20));
@@ -682,7 +707,7 @@ namespace Hai.TransferAssistant
                         };
                         if (isDeep)
                         {
-                            ColoredBackgroundVoid(obj != null && typeof(Component).IsAssignableFrom(obj.GetType()), Color.yellow, () =>
+                            ColoredBackgroundVoid(obj != null && typeof(Component).IsAssignableFrom(obj.GetType()), ComponentlikeColor, () =>
                                 EditorGUILayout.LabelField($"({(obj != null ? obj.GetType().Name : "null")}) " + reasonText, EditorStyles.miniLabel));
                         }
                         else
@@ -767,7 +792,7 @@ namespace Hai.TransferAssistant
                 return;
             }
 
-            (_cachedComponents, _cachedNonComponents) = PartitionBy(_analysis.DataSortedTypes, IsComponentOrStateMachineBehaviour);
+            (_cachedComponents, _cachedNonComponents) = PartitionBy(_analysis.DataSortedTypes, TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour);
             _cachedComponentGroups = _cachedComponents
                 .GroupBy(ttype =>
                 {
@@ -790,7 +815,7 @@ namespace Hai.TransferAssistant
                 .ToList();
         }
 
-        private static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)
+        internal static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)
         {
             ColoredBackground(isActive, bgColor, () =>
             {

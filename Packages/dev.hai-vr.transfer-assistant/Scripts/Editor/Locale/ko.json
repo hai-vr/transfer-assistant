@@ -62,7 +62,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "속성 변경",
             "reason_IsDriveByAsset": "부수적인 에셋",
             "reason_IsObjectReference": "SerializedObject 내에 포함됨",
-            "reason_IsComponent": "컴포넌트"
+            "reason_IsComponent": "컴포넌트",
+            "already_shown": "(이미 표시됨)"
         },
         "enums": {
         }

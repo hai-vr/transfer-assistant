@@ -62,7 +62,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "屬性修改",
             "reason_IsDriveByAsset": "隨航資產",
             "reason_IsObjectReference": "包含在 SerializedObject 中",
-            "reason_IsComponent": "組件"
+            "reason_IsComponent": "組件",
+            "already_shown": "(已顯示)"
         },
         "enums": {
         }

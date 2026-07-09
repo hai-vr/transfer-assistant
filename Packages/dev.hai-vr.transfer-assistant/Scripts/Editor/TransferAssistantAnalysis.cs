@@ -12,6 +12,7 @@ namespace Hai.TransferAssistant
     {
         internal const string UnknownAssetAndDLLTypeName = "DefaultAsset";
         
+        public HashSet<Object> Targets => _targets;
         private HashSet<Object> _targets;
         
         public Dictionary<GameObject, HashSet<GameObject>> DataPrefabObjectToInstances;
@@ -25,6 +26,8 @@ namespace Hai.TransferAssistant
         private HashSet<string> _excludedTypeNames;
         private bool _includeEditorOnly;
         private bool _includeHiddenInPrefabs;
+        
+        public event Action OnUpdate;
 
         public void DoPerformAnalysis(List<Object> targets, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly, bool includeHiddenInPrefabs)
         {
@@ -154,7 +157,10 @@ namespace Hai.TransferAssistant
                         item = log.discoveredObject,
                         persistentAsset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GetAssetPath(log.discoveredObject)),
                         reason = log.reason,
-                    }).ToList();
+                    })
+                    .Distinct()
+                    .OrderBy(dependency => dependency.item.name)
+                    .ToList();
                 var filteredIsDependedBy = isDependedBy
                     .Where(log => log.originatorNullableIfRoot != null)
                     .Select(log => new DeepviewDependency
@@ -162,7 +168,10 @@ namespace Hai.TransferAssistant
                         item = log.originatorNullableIfRoot,
                         persistentAsset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GetAssetPath(log.originatorNullableIfRoot)),
                         reason = log.reason,
-                    }).ToList();
+                    })
+                    .OrderBy(dependency => dependency.item == null)
+                    .ThenBy(dependency => dependency.item != null ? dependency.item.name : "")
+                    .ToList();
                 var boringReferences = filteredDependsOn.Concat(filteredIsDependedBy)
                     .Select(dependency => dependency.persistentAsset != null ? dependency.persistentAsset : (dependency.item is GameObject ? dependency.item : null))
                     .Distinct()
@@ -356,6 +365,8 @@ namespace Hai.TransferAssistant
                     TotalAfterCulling++;
                 }
             }
+            
+            OnUpdate?.Invoke();
         }
 
 
@@ -376,6 +387,11 @@ namespace Hai.TransferAssistant
         public static bool IsIgnoredScene(Scene scene)
         {
             return scene.name.Contains("NDMF Preview");
+        }
+
+        public static bool IsComponentOrStateMachineBehaviour(Type t)
+        {
+            return typeof(Component).IsAssignableFrom(t) || typeof(StateMachineBehaviour).IsAssignableFrom(t);
         }
     }
     

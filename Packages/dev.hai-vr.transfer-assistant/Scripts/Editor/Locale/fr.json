@@ -62,7 +62,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "Modification de propriété",
             "reason_IsDriveByAsset": "Asset adjacent",
             "reason_IsObjectReference": "Contenu dans SerializedObject",
-            "reason_IsComponent": "Composant"
+            "reason_IsComponent": "Composant",
+            "already_shown": "(Déjà affiché)"
         },
         "enums": {
         }

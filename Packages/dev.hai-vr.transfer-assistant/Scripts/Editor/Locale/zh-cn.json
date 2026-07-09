@@ -34,6 +34,7 @@
             "target_mode_multiple": "多目标",
             "target_mode_current_scenes": "当前场景",
             "types": "类型",
+            "tree_view": "树状视图",
             "components": "组件",
             "options": "选项",
             "include_editor_only": "包含 EditorOnly",
@@ -62,7 +63,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "属性修改",
             "reason_IsDriveByAsset": "随航资源",
             "reason_IsObjectReference": "包含在 SerializedObject 中",
-            "reason_IsComponent": "组件"
+            "reason_IsComponent": "组件",
+            "already_shown": "(已显示)"
         },
         "enums": {
         }

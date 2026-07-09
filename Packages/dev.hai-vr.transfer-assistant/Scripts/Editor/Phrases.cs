@@ -30,6 +30,7 @@ namespace Hai.TransferAssistant
         public const string target_mode_multiple = nameof(target_mode_multiple);
         public const string target_mode_current_scenes = nameof(target_mode_current_scenes);
         public const string types = nameof(types);
+        public const string tree_view = nameof(tree_view);
         public const string components = nameof(components);
         public const string options = nameof(options);
         public const string include_editor_only = nameof(include_editor_only);
@@ -62,5 +63,6 @@ namespace Hai.TransferAssistant
         public const string reason_IsDriveByAsset = nameof(reason_IsDriveByAsset);
         public const string reason_IsObjectReference = nameof(reason_IsObjectReference);
         public const string reason_IsComponent = nameof(reason_IsComponent);
+        public const string already_shown = nameof(already_shown);
     }
 }

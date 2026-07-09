@@ -3,7 +3,7 @@ TestCase
 
 Items in **bold** denote assets.
 
-**VariantTestCube** and **SceneHasPrefabOverride** are the entry points of the test.
+**Chain**, **VariantTestCube**, and **SceneHasPrefabOverride** are the entry points of the test.
 
 - **SceneHasPrefabOverride** contains **OfficialTestCube** with overrides. ----- The contents are similar to **VariantTestCube**, but it is not an instance of it.
 - **VariantTestCube** is a variant prefab of **OfficialTestCube** with overrides.
@@ -38,3 +38,5 @@ Items in **bold** denote assets.
     - SkinnedMeshRenderer
       - **OfficialMaterial**
         - **OfficialTexture**
+
+The **Chain** object is to test the Tree tab, and ensure that the boring GameObjects A, B, and C aren't causing assets to be skipped in the view.

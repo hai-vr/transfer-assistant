@@ -63,7 +63,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "プロパティ変更",
             "reason_IsDriveByAsset": "ついでにあるアセット",
             "reason_IsObjectReference": "SerializedObject 内に含まれる",
-            "reason_IsComponent": "コンポーネント"
+            "reason_IsComponent": "コンポーネント",
+            "already_shown": "(表示済み)"
         },
         "enums": {
         }

@@ -34,6 +34,7 @@
             "target_mode_multiple": "Multiple Targets",
             "target_mode_current_scenes": "Current Scenes",
             "types": "Types",
+            "tree_view": "Tree view",
             "components": "Components",
             "options": "Options",
             "include_editor_only": "Include EditorOnly",
@@ -62,7 +63,8 @@
             "reason_IsPropertyModificationOfPrefabInstance": "Property Modification",
             "reason_IsDriveByAsset": "Drive-by Asset",
             "reason_IsObjectReference": "Contained within SerializedObject",
-            "reason_IsComponent": "Component"
+            "reason_IsComponent": "Component",
+            "already_shown": "(Already shown)"
         },
         "enums": {
         }
