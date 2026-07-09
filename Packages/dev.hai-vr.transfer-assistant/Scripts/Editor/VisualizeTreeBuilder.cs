@@ -47,6 +47,7 @@ namespace Hai.TransferAssistant
 
     internal class DependencyTreeView : TreeView
     {
+        private const string EditorOnlyLabel = "EditorOnly";
         private readonly TransferAssistantAnalysis _analysis;
         private readonly HaiEFLoc _localize;
         private string _customSearchString;
@@ -242,6 +243,17 @@ namespace Hai.TransferAssistant
             var isPersistentGameObject = isDeepview && deepview.isMainAsset;
             var isPrefabInstanceRoot = isDeepview && deepview.isAnyPrefabInstanceRoot;
             var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(item.Target.GetType());
+
+            if (isDeepview && deepview.isEditorOnly)
+            {
+                var labelContent = new GUIContent(EditorOnlyLabel);
+                var labelWidth = EditorStyles.miniLabel.CalcSize(labelContent).x;
+                objectFieldRect.width -= labelWidth + 4;
+                
+                var editorOnlyLabelRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, labelWidth, objectFieldRect.height);
+                TransferAssistantWindow.ColoredBackgroundVoid(true, TransferAssistantWindow.EditorOnlyColor, () =>
+                    EditorGUI.LabelField(editorOnlyLabelRect, labelContent, EditorStyles.miniLabel));
+            }
             
             var isMatch = !string.IsNullOrEmpty(_customSearchString) && DoesItemMatchSearch(item, _customSearchString);
             var prevFontStyle = EditorStyles.objectField.fontStyle;
