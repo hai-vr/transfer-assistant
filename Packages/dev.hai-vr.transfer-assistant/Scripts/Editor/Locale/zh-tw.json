@@ -19,6 +19,7 @@
             "instantiated_in": "實例化於",
             "is_depended_by": "被相依於",
             "msg_scene_objects_selected": "您選擇了場景對象而不是項目中的資源（如 Prefab）。匯出將不包含這些場景對象。",
+            "msg_scenes_must_be_open": "場景只能通過打開它們來進行分析。請將模式切換到當前場景。",
             "msg_will_not_affect_export": "以下選項不會影響匯出的資源。",
             "path": "路徑",
             "perform_analysis": "執行分析",

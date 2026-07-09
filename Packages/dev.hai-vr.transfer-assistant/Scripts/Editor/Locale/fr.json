@@ -19,6 +19,7 @@
             "instantiated_in": "Instancié dans",
             "is_depended_by": "Est utilisé par",
             "msg_scene_objects_selected": "Vous avez sélectionné des objets de la scène au lieu d'actifs du projet (tels que des prefabs). L'exportation n'inclura pas ces objets de la scène.",
+            "msg_scenes_must_be_open": "Les scènes ne peuvent être analysées qu'en les ouvrant. Basculez le mode sur Scènes actuelles.",
             "msg_will_not_affect_export": "Ces options ci-dessous n'affecteront pas quels assets sont exportés.",
             "path": "Chemin",
             "perform_analysis": "Effectuer l'analyse",

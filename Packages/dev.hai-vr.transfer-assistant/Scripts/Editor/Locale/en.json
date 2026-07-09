@@ -19,6 +19,7 @@
             "instantiated_in": "Instantiated in",
             "is_depended_by": "Is depended by",
             "msg_scene_objects_selected": "You have selected scene objects instead of assets from the project (such as prefabs). Exporting will not include those scene objects.",
+            "msg_scenes_must_be_open": "Scenes can only be analyzed by opening them. Switch the mode to Current Scenes.",
             "msg_will_not_affect_export": "These options below won't affect which assets are exported.",
             "path": "Path",
             "perform_analysis": "Perform analysis",

@@ -19,6 +19,7 @@
             "instantiated_in": "다음에 배치됨",
             "is_depended_by": "다음에 의해 의존됨",
             "msg_scene_objects_selected": "프로젝트 에셋(프리팹 등) 대신 씬 오브젝트를 선택했습니다. 내보내기에는 해당 씬 오브젝트가 포함되지 않습니다.",
+            "msg_scenes_must_be_open": "씬은 열려 있는 상태에서만 분석할 수 있습니다. 모드를 현재 씬으로 전환하십시오.",
             "msg_will_not_affect_export": "아래 옵션들은 내보낼 에셋에 영향을 주지 않습니다.",
             "path": "경로",
             "perform_analysis": "분석 실행",

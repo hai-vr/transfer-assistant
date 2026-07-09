@@ -179,11 +179,15 @@ namespace Hai.TransferAssistant
 
             var invalid = _targetMode switch
             {
-                TargetMode.SingleTarget => target == null,
-                TargetMode.MultipleTargets => targets == null || targets.Length == 0,
+                TargetMode.SingleTarget => target == null || target is SceneAsset,
+                TargetMode.MultipleTargets => targets == null || targets.Length == 0 || targets.Length == 1 && targets[0] is SceneAsset,
                 TargetMode.CurrentScenes => false,
                 _ => throw new ArgumentOutOfRangeException()
             };
+            if (_targetMode == TargetMode.SingleTarget && target is SceneAsset || _targetMode == TargetMode.MultipleTargets && targets != null && targets.Length == 1 && targets[0] is SceneAsset)
+            {
+                localize.HelpBox(Phrases.msg_scenes_must_be_open, MessageType.Error);
+            }
             if (!invalid)
             {
                 var usesSceneObject = _targetMode switch

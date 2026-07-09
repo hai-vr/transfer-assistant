@@ -19,6 +19,7 @@
             "instantiated_in": "实例化于",
             "is_depended_by": "被依赖于",
             "msg_scene_objects_selected": "您选择了场景对象而不是项目中的资源（如 Prefab）。导出将不包含这些场景对象。",
+            "msg_scenes_must_be_open": "场景只能通过打开它们来进行分析。请将模式切换到当前场景。",
             "msg_will_not_affect_export": "以下选项不会影响导出的资源。",
             "path": "路径",
             "perform_analysis": "执行分析",

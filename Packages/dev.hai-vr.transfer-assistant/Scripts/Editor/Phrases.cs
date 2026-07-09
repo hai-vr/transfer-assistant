@@ -15,6 +15,7 @@ namespace Hai.TransferAssistant
         public const string instantiated_in = nameof(instantiated_in);
         public const string is_depended_by = nameof(is_depended_by);
         public const string msg_scene_objects_selected = nameof(msg_scene_objects_selected);
+        public const string msg_scenes_must_be_open = nameof(msg_scenes_must_be_open);
         public const string msg_will_not_affect_export = nameof(msg_will_not_affect_export);
         public const string path = nameof(path);
         public const string perform_analysis = nameof(perform_analysis);
