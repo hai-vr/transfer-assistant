@@ -159,7 +159,9 @@ namespace Hai.TransferAssistant
                         reason = log.reason,
                     })
                     .Distinct()
-                    .OrderBy(dependency => dependency.item.name)
+                    // We stopped sorting because it messes up the hierarchy order in the Tree view tab.
+                    // .OrderBy(dependency => dependency.reason != TraversalReason.IsChildTransform) // This is sort of a hack so that the Tree view tab prioritizes child transforms, so that "Already Shown" doesn't happen on child transform traversal.
+                    // .ThenBy(dependency => dependency.item.name)
                     .ToList();
                 var filteredIsDependedBy = isDependedBy
                     .Where(log => log.originatorNullableIfRoot != null)
@@ -169,8 +171,10 @@ namespace Hai.TransferAssistant
                         persistentAsset = AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GetAssetPath(log.originatorNullableIfRoot)),
                         reason = log.reason,
                     })
-                    .OrderBy(dependency => dependency.item == null)
-                    .ThenBy(dependency => dependency.item != null ? dependency.item.name : "")
+                    // We stopped sorting because it messes up the hierarchy order in the Tree view tab.
+                    // .OrderBy(dependency => dependency.reason != TraversalReason.IsChildTransform) // This is sort of a hack so that the Tree view tab prioritizes child transforms, so that "Already Shown" doesn't happen on child transform traversal.
+                    // .ThenBy(dependency => dependency.item == null)
+                    // .ThenBy(dependency => dependency.item != null ? dependency.item.name : "")
                     .ToList();
                 var boringReferences = filteredDependsOn.Concat(filteredIsDependedBy)
                     .Select(dependency => dependency.persistentAsset != null ? dependency.persistentAsset : (dependency.item is GameObject ? dependency.item : null))
