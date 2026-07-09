@@ -236,8 +236,11 @@ namespace Hai.TransferAssistant
                 var labelRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, labelWidth, objectFieldRect.height);
                 EditorGUI.LabelField(labelRect, labelContent, EditorStyles.miniLabel);
             }
-            
-            var isPersistentGameObject = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out var that) && that.isMainAsset;
+
+            Deepview deepview = null;
+            var isDeepview = item.Target is GameObject && _analysis.DataDeepviews.TryGetValue(item.Target, out deepview);
+            var isPersistentGameObject = isDeepview && deepview.isMainAsset;
+            var isPrefabInstanceRoot = isDeepview && deepview.isAnyPrefabInstanceRoot;
             var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(item.Target.GetType());
             
             var isMatch = !string.IsNullOrEmpty(_customSearchString) && DoesItemMatchSearch(item, _customSearchString);
@@ -249,8 +252,10 @@ namespace Hai.TransferAssistant
             
             EditorGUI.BeginDisabledGroup(isComponentOrStateMachineBehaviour || item.Target is GameObject && !isPersistentGameObject);
             TransferAssistantWindow.ColoredBackgroundVoid(
-                isPersistentGameObject || isComponentOrStateMachineBehaviour,
-                isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor : TransferAssistantWindow.PersistentGameObjectColor,
+                isPersistentGameObject || isComponentOrStateMachineBehaviour || isPrefabInstanceRoot,
+                isComponentOrStateMachineBehaviour ? TransferAssistantWindow.ComponentlikeColor :
+                    isPrefabInstanceRoot ? TransferAssistantWindow.PrefabInstanceRootGameObjectColor :
+                    TransferAssistantWindow.PersistentGameObjectColor,
                 () => EditorGUI.ObjectField(objectFieldRect, item.Target, typeof(Object), false));
             EditorGUI.EndDisabledGroup();
             

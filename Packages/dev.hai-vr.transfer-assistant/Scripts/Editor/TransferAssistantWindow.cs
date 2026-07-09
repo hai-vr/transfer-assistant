@@ -10,7 +10,8 @@ namespace Hai.TransferAssistant
 {
     public class TransferAssistantWindow : EditorWindow
     {
-        internal static readonly Color PersistentGameObjectColor = new(0.66f, 1f, 0.82f);
+        internal static readonly Color PrefabInstanceRootGameObjectColor = new(0.66f, 1f, 0.82f);
+        internal static readonly Color PersistentGameObjectColor = new(0.57f, 0.9f, 1f);
         internal static readonly Color ComponentlikeColor = Color.yellow;
         internal static readonly Color EditorOnlyColor = new(1f, 0.65f, 0.67f);
         
