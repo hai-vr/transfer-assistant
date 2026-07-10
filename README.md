@@ -67,6 +67,9 @@ This tool attempts to facilitate the transfer of an avatar between incompatible 
 
 ## Reference manual
 
+The documentation for this tool is being written, and it will be available [here in English](https://docs.hai-vr.dev/docs/products/transfer-assistant),
+and [here in Japanese](https://docs.hai-vr.dev/docs/products/transfer-assistant/ja).
+
 These are the basic steps in how to use the tool:
 - Choose which assets to analyze.
 - Narrow down which asset references you want to keep.
