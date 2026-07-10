@@ -332,7 +332,8 @@ namespace Hai.TransferAssistant
             localize.HelpBox(Phrases.msg_will_not_affect_export, MessageType.None);
             EditorGUILayout.BeginHorizontal();
             var prevSearch = search;
-            search = EditorGUILayout.TextField(localize.Text(Phrases.search), prevSearch);
+            EditorGUILayout.LabelField(localize.Text(Phrases.search), GUILayout.Width(EditorStyles.label.CalcSize(new GUIContent(localize.Text(Phrases.search))).x + 20));
+            search = EditorGUILayout.TextField(prevSearch);
             if (prevSearch != search)
             {
                 searchObject = null;
