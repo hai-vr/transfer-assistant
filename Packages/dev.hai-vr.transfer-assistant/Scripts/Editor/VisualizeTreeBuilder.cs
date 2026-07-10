@@ -262,7 +262,7 @@ namespace Hai.TransferAssistant
             if (string.IsNullOrEmpty(_customSearchString)) return false;
             if (_customSearchString.StartsWith("t:"))
             {
-                return item is DependencyTreeViewItem dependencyItem && dependencyItem.Target.GetType().FullName == _customSearchString.Substring(2);
+                return item is DependencyTreeViewItem dependencyItem && dependencyItem.Target != null && dependencyItem.Target.GetType().FullName == _customSearchString.Substring(2);
             }
             
             return item.displayName.IndexOf(_customSearchString, StringComparison.OrdinalIgnoreCase) >= 0;
