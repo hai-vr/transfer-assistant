@@ -106,10 +106,6 @@ namespace Hai.TransferAssistant
                 {
                     _customSearchObject = value;
                     Reload();
-                    if (!string.IsNullOrEmpty(_customSearchString) || _customSearchObject != null)
-                    {
-                        ExpandAll();
-                    }
                 }
             }
         }
