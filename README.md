@@ -67,9 +67,19 @@ This tool attempts to facilitate the transfer of an avatar between incompatible 
 
 ## Reference manual
 
-### Open the Transfer Assistant window
+These are the basic steps in how to use the tool:
+- Choose which assets to analyze.
+- Narrow down which asset references you want to keep.
+- Explore which assets require other assets.
+- Prepare export to preview which asset files will be exported.
+- Understand why unexpected asset files are required using the dependency tree.
+- Export the selected assets.
+
+### Choose which assets to analyze
 
 In the *Project* tab, right-click a prefab or scene and choose *Transfer Assistant...*
+
+If you're working on an avatar, you should select the prefab that contains your avatar, not the files of your avatar.
 
 Alternatively, you can go to *Window > Haï~ > Transfer Assistant*, then choose a prefab, and click the *Perform analysis* button.
 
@@ -84,7 +94,7 @@ The dropdown on the top right lets you switch between different object selection
 
 If you decide to change the target, click the *Perform analysis* button before continuing.
 
-### Transfer Assistant window
+### Narrow down which asset references you want to keep
 
 Press the checkboxes in the sidebar on the left to affect which assets will get exported.
 
@@ -108,8 +118,26 @@ These checkboxes have a cascading effect; unchecking Materials will affect which
     - This is the recommended option for **world-like projects**.
   - When unchecked, assets nested inside source Prefabs are not included, so that the only assets that are included are those that your target object uses.
     - This is the recommended option for **avatar-like projects**, and thus is the default option.
+
+### Explore which assets require other assets
+
+The main panel of the *Transfer Assistant* contains a tree of objects.
+
+If you look at an object in that tree:
+- The object depends on the children of that tree.
+- The object is referenced whatever is its parent. There may be multiple references to that object in the dependency tree.
+
+**Press the magnifier icon on specific objects** to focus on those objects and understand which objects it depends on and which objects depend on it.
+
+In the sidebar, you may sometimes see asset types, and occasionally you might not understand why they are being included.
+
+**Press the magnifier icon to focus on those asset types**. This will display on the tree every dependency that requires those asset types.
+
+Alternatively, you may also type text to search for asset names or drag an object directly from your project into the field at the right of the text field.
+
+Clicking the magnifier icon again will clear the search.
   
-### Prepare Export window
+### Prepare export to preview which asset files will be exported
 
 In the sidebar, press the *Prepare Export...* button. This will open a new window which looks similar to the *Export .unitypackage* window.
 
@@ -118,12 +146,24 @@ In there, you can inspect which files would be exported and refine your selectio
 The sidebar of that window has buttons for each asset type. These do not have a cascading effect.
 - **Select**: Selects the assets of this type, which will include them in the export.
 - **Deselect**: Deselects the assets of this type, which will exclude them from the export.
-- **Hide**: Deselects the assets of this type and removes them from the Export window.
-  - *Note: Pressing Hide will **not** deselect the assets that are referenced by those assets, so this is different from the Culling option. Read more about this in the next section below.*
+- **Deselect and Hide**: Deselects the assets of this type and removes them from the Export window.
+  - *Note: Pressing Deselect and Hide will **not** deselect the assets that are referenced by those assets, so this is different from the Culling option from the Transfer Assets window. Read more about this in the annex section below.*
 
-Press the *Export Selected* button to export the selected assets.
+### Understand why unexpected asset files are required using the dependency tree
 
-#### Difference between Culling and Filtering
+In the *Prepare Export* window, you may sometimes see files without understanding why they are getting exported.
+
+In that case, press the magnifier icon to the right. This will put that asset inside the search of the *Transfer Assistant* window.
+
+You can use this information to figure out which object in your hierarchy requires that asset.
+
+### Export the selected assets
+
+Press the *Export to file...* button to export the selected assets to a file of your choice.
+
+Alternatively, pressing the *Quick Export* button will export or overwrite the `export.unitypackage` file.
+
+### Annex: Difference between Culling and Filtering
 
 You will notice there are two systems that will help narrow down which assets are exported: Culling, and Filtering.
 
