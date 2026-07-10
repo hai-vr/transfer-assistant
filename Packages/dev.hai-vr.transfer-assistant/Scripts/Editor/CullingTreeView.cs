@@ -13,18 +13,18 @@ namespace Hai.TransferAssistant
         private readonly HaiEFLoc _localize;
         private readonly HashSet<string> _afterCullingTypeFullNames;
         private readonly Action _onChanged;
-        private readonly Action<Type> _onSearchType;
+        private readonly TransferAssistantWindow _window;
         private List<Type> _cachedNonComponents;
         private List<TransferAssistantWindow.ComponentGroup> _cachedComponentGroups;
         private Texture _searchIcon;
 
-        public CullingTreeView(TreeViewState state, TransferAssistantAnalysis analysis, HaiEFLoc localize, HashSet<string> afterCullingTypeFullNames, Action onChanged, Action<Type> onSearchType) : base(state)
+        public CullingTreeView(TreeViewState state, TransferAssistantAnalysis analysis, HaiEFLoc localize, HashSet<string> afterCullingTypeFullNames, Action onChanged, TransferAssistantWindow window) : base(state)
         {
             _analysis = analysis;
             _localize = localize;
             _afterCullingTypeFullNames = afterCullingTypeFullNames;
             _onChanged = onChanged;
-            _onSearchType = onSearchType;
+            _window = window;
             showAlternatingRowBackgrounds = true;
         }
 
@@ -130,7 +130,8 @@ namespace Hai.TransferAssistant
                 _searchIcon ??= EditorGUIUtility.IconContent(TransferAssistantWindow.SearchIconContent).image;
                 if (GUI.Button(buttonRect, _searchIcon))
                 {
-                    _onSearchType?.Invoke(ttype);
+                    _window.ApplyOrToggleSearchType(ttype);
+                    _window.Repaint();
                 }
             }
             else if (item is GroupTreeViewItem groupItem)

@@ -30,6 +30,30 @@ namespace Hai.TransferAssistant
         public string search = "";
         public Object searchObject;
         
+        public void ApplyOrToggleSearchType(Type input)
+        {
+            ApplyOrToggleSearchString($"t:{input.FullName}");
+        }
+
+        public void ApplyOrToggleSearchString(string input)
+        {
+            if (searchObject != null)
+            {
+                search = input;
+                searchObject = null;
+            }
+            else
+            {
+                search = search == input ? "" : input;
+                searchObject = null;
+            }
+        }
+
+        public void ApplyOrToggleSearchObject(Object input)
+        {
+            searchObject = searchObject == input ? null : input;
+        }
+        
         private Texture _searchIcon;
         private static readonly HashSet<string> AfterCullingTypeFullNamesDefault = new() 
         {
@@ -107,13 +131,7 @@ namespace Hai.TransferAssistant
                 _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
                 SavePrefs();
                 Repaint();
-            }, ttype =>
-            {
-                var searchTerm = "t:" + ttype.FullName;
-                search = search == searchTerm ? "" : searchTerm;
-                searchObject = null;
-                Repaint();
-            });
+            }, this);
         }
 
         private void SavePrefs()
@@ -265,7 +283,7 @@ namespace Hai.TransferAssistant
                         .Distinct()
                         .ToArray();
 
-                    TransferExportWindow.ShowWindow(allRelevantAssets, _analysis.AfterCullingDataDeepviews.Keys.ToList());
+                    TransferExportWindow.ShowWindow(allRelevantAssets, _analysis.AfterCullingDataDeepviews.Keys.ToList(), this);
                 }
 
                 EditorGUI.EndDisabledGroup();
@@ -393,29 +411,11 @@ namespace Hai.TransferAssistant
             EditorGUILayout.EndVertical();
         }
 
-
         private void LayoutVisualizeTree()
         {
             if (_visualizeTreeBuilder == null)
             {
-                _visualizeTreeBuilder = new VisualizeTreeBuilder(_localize);
-                _visualizeTreeBuilder.OnSearchObjectRequested = obj =>
-                {
-                    searchObject = searchObject == obj ? null : obj;
-                };
-                _visualizeTreeBuilder.OnSearchStringRequested = s =>
-                {
-                    if (searchObject != null)
-                    {
-                        search = s;
-                        searchObject = null;
-                    }
-                    else
-                    {
-                        search = search == s ? "" : s;
-                        searchObject = null;
-                    }
-                };
+                _visualizeTreeBuilder = new VisualizeTreeBuilder(_localize, this);
                 _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
                 _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
             }

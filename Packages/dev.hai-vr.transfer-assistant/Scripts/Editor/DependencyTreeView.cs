@@ -11,18 +11,18 @@ namespace Hai.TransferAssistant
     internal class VisualizeTreeBuilder
     {
         private readonly HaiEFLoc _localize;
+        private readonly TransferAssistantWindow _window;
         private TransferAssistantAnalysis _analysis;
         private TreeViewState _treeViewState;
         private DependencyTreeView _treeView;
-        public Action<Object> OnSearchObjectRequested;
-        public Action<string> OnSearchStringRequested;
         private bool _expandDependencies = true;
         private bool _expandTypes = true;
         private bool _expandAssetsContainingOthers = true;
 
-        public VisualizeTreeBuilder(HaiEFLoc localize)
+        public VisualizeTreeBuilder(HaiEFLoc localize, TransferAssistantWindow window)
         {
             _localize = localize;
+            _window = window;
         }
 
         public void WhenAnalysisUpdated(TransferAssistantAnalysis analysis)
@@ -45,9 +45,7 @@ namespace Hai.TransferAssistant
             if (_treeView == null)
             {
                 _treeViewState ??= new TreeViewState();
-                _treeView = new DependencyTreeView(_treeViewState, _analysis, _localize);
-                _treeView.OnSearchObjectRequested = obj => OnSearchObjectRequested?.Invoke(obj);
-                _treeView.OnSearchStringRequested = s => OnSearchStringRequested?.Invoke(s);
+                _treeView = new DependencyTreeView(_treeViewState, _analysis, _localize, _window);
                 _treeView.Reload();
                 _treeView.ExpandAll();
                 if (!_expandDependencies) _treeView.SetExpanded(DependencyTreeView.DependenciesId, false);
@@ -80,11 +78,10 @@ namespace Hai.TransferAssistant
 
         private readonly TransferAssistantAnalysis _analysis;
         private readonly HaiEFLoc _localize;
+        private readonly TransferAssistantWindow _window;
         private string _customSearchString;
         private Object _customSearchObject;
 
-        public Action<Object> OnSearchObjectRequested;
-        public Action<string> OnSearchStringRequested;
         private readonly Texture _searchIcon = EditorGUIUtility.IconContent(TransferAssistantWindow.SearchIconContent).image;
 
         public string CustomSearchString
@@ -113,10 +110,11 @@ namespace Hai.TransferAssistant
             }
         }
 
-        public DependencyTreeView(TreeViewState state, TransferAssistantAnalysis analysis, HaiEFLoc localize) : base(state)
+        public DependencyTreeView(TreeViewState state, TransferAssistantAnalysis analysis, HaiEFLoc localize, TransferAssistantWindow window) : base(state)
         {
             _analysis = analysis;
             _localize = localize;
+            _window = window;
             showAlternatingRowBackgrounds = true;
         }
 
@@ -342,7 +340,8 @@ namespace Hai.TransferAssistant
                     var buttonRect = new Rect(labelRect.xMax + 4, labelRect.y, buttonWidth, labelRect.height);
                     if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
                     {
-                        OnSearchStringRequested?.Invoke("t:" + item.Type.FullName);
+                        _window.ApplyOrToggleSearchString("t:" + item.Type.FullName);
+                        _window.Repaint();
                     }
                 }
 
@@ -360,7 +359,8 @@ namespace Hai.TransferAssistant
                 var buttonRect = new Rect(objectFieldRect.xMax + 4, objectFieldRect.y, buttonWidth, objectFieldRect.height);
                 if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
                 {
-                    OnSearchObjectRequested?.Invoke(item.Target);
+                    _window.ApplyOrToggleSearchObject(item.Target);
+                    _window.Repaint();
                 }
             }
 

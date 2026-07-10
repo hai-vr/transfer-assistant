@@ -27,12 +27,14 @@ namespace Hai.TransferAssistant
         private HaiAssetTreeView _treeView;
         private string[] _assetPaths;
         private List<string> _assetsByTraversal;
+        private TransferAssistantWindow _window;
 
-        public static void ShowWindow(string[] assetPaths, List<Object> assetsByTraversal)
+        public static void ShowWindow(string[] assetPaths, List<Object> assetsByTraversal, TransferAssistantWindow assistantWindow)
         {
             var window = GetWindow<TransferExportWindow>(localize.Text(Phrases.window_title));
             window._assetPaths = assetPaths;
             window._assetsByTraversal = assetsByTraversal.Select(AssetDatabase.GetAssetPath).ToList();
+            window._window = assistantWindow;
             window.Initialize();
             window.Show();
         }
@@ -40,7 +42,7 @@ namespace Hai.TransferAssistant
         private void Initialize()
         {
             _treeViewState = new TreeViewState();
-            _treeView = new HaiAssetTreeView(_treeViewState, _assetPaths);
+            _treeView = new HaiAssetTreeView(_treeViewState, _assetPaths, _window);
             _treeView.Reload();
 
             _treeView.UnselectPathsNotIn(_assetsByTraversal);
@@ -179,6 +181,7 @@ namespace Hai.TransferAssistant
         private readonly Dictionary<string, bool> _selectionStates = new();
         private readonly Dictionary<string, int> _pathToId = new();
         private readonly HashSet<string> _assetPathSet;
+        private readonly TransferAssistantWindow _window;
         private TypeCount[] _cachedTypeCounts;
         private int _nextId = 1;
         private string[] _assetPaths;
@@ -190,11 +193,12 @@ namespace Hai.TransferAssistant
             public int Count;
         }
 
-        public HaiAssetTreeView(TreeViewState state, string[] assetPaths) : base(state)
+        public HaiAssetTreeView(TreeViewState state, string[] assetPaths, TransferAssistantWindow window) : base(state)
         {
             assetPaths = assetPaths.OrderBy(p => p, StringComparer.InvariantCulture).ToArray();
             _assetPaths = assetPaths;
             _assetPathSet = new HashSet<string>(assetPaths);
+            _window = window;
             foreach (var path in _assetPaths)
             {
                 _pathToType[path] = AssetDatabase.GetMainAssetTypeAtPath(path);
@@ -349,10 +353,10 @@ namespace Hai.TransferAssistant
                 var buttonRect = new Rect(rect.xMax + 4, rect.y, buttonWidth, rect.height);
                 if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
                 {
-                    var window = EditorWindow.GetWindow<TransferAssistantWindow>();
-                    if (window != null)
+                    if (_window != null)
                     {
-                        window.searchObject = AssetDatabase.LoadMainAssetAtPath(path);
+                        _window.ApplyOrToggleSearchObject(AssetDatabase.LoadMainAssetAtPath(path));
+                        _window.Repaint();
                     }
                 }
             }
