@@ -12,5 +12,5 @@
   "url" : "https://docs.hai-vr.dev/docs/products/transfer-assistant",
   "documentationUrl": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
   "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/transfer-assistant",
-  "license": "NOT DEFINED, CHANGE ME"
+  "license": "MIT"
 }
