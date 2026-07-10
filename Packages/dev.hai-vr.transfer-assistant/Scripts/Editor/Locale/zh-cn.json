@@ -54,7 +54,9 @@
             "reason_IsObjectReference": "包含在 SerializedObject 中",
             "reason_IsComponent": "组件",
             "already_shown": "(已显示)",
-            "prefab_instance": "Prefab 实例"
+            "prefab_instance": "Prefab 实例",
+            "dependencies": "依赖关系",
+            "types": "类型"
         },
         "enums": {
         }

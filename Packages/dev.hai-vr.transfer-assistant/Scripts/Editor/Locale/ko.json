@@ -53,7 +53,10 @@
             "reason_IsDriveByAsset": "부수적인 에셋",
             "reason_IsObjectReference": "SerializedObject 내에 포함됨",
             "reason_IsComponent": "컴포넌트",
-            "already_shown": "(이미 표시됨)"
+            "already_shown": "(이미 표시됨)",
+            "prefab_instance": "프리팹 인스턴스",
+            "dependencies": "의존성",
+            "types": "타입"
         },
         "enums": {
         }

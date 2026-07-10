@@ -54,7 +54,9 @@
             "reason_IsObjectReference": "SerializedObject 内に含まれる",
             "reason_IsComponent": "コンポーネント",
             "already_shown": "(表示済み)",
-            "prefab_instance": "Prefab インスタンス"
+            "prefab_instance": "Prefab インスタンス",
+            "dependencies": "依存関係",
+            "types": "型"
         },
         "enums": {
         }

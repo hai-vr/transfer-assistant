@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -111,14 +112,38 @@ namespace Hai.TransferAssistant
             var root = new TreeViewItem { id = 0, depth = -1, displayName = "Root" };
             var allItems = new List<TreeViewItem>();
 
-            var visited = new HashSet<Object>();
             var idCounter = 1;
 
+            var dependenciesItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.dependencies), null, true, false);
+            allItems.Add(dependenciesItem);
+            
+            var visited = new HashSet<Object>();
             foreach (var target in _analysis.Targets)
             {
                 if (_analysis.DataDeepviews.ContainsKey(target))
                 {
-                    BuildNode(target, visited, 0, ref idCounter, allItems, true);
+                    BuildNode(target, visited, 1, ref idCounter, allItems, true);
+                }
+            }
+
+            var typesItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.types), null, true, false);
+            allItems.Add(typesItem);
+
+            var assetsByType = _analysis.AfterCullingDataDeepviews.Keys
+                .Where(obj => obj != null)
+                .GroupBy(obj => obj.GetType())
+                .OrderBy(group => group.Key.Name, StringComparer.InvariantCulture);
+
+            foreach (var group in assetsByType)
+            {
+                var typeItem = new DependencyTreeViewItem(idCounter++, 1, group.Key.Name, null, true, false);
+                allItems.Add(typeItem);
+
+                var sortedAssets = group.OrderBy(obj => obj.name, StringComparer.InvariantCulture);
+                foreach (var asset in sortedAssets)
+                {
+                    var assetItem = new DependencyTreeViewItem(idCounter++, 2, asset.name, asset, false, false);
+                    allItems.Add(assetItem);
                 }
             }
 
@@ -267,6 +292,15 @@ namespace Hai.TransferAssistant
                         Reload();
                     }
                 }
+            }
+
+            if (item.Target == null)
+            {
+                var labelRect = rect;
+                labelRect.x += indent;
+                labelRect.width -= indent;
+                EditorGUI.LabelField(labelRect, item.displayName, EditorStyles.boldLabel);
+                return;
             }
 
             var objectFieldRect = rect;

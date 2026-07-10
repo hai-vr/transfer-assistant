@@ -54,7 +54,9 @@
             "reason_IsObjectReference": "Contenu dans SerializedObject",
             "reason_IsComponent": "Composant",
             "already_shown": "(Déjà affiché)",
-            "prefab_instance": "Instance du Prefab"
+            "prefab_instance": "Instance du Prefab",
+            "dependencies": "Dépendances",
+            "types": "Types"
         },
         "enums": {
         }
