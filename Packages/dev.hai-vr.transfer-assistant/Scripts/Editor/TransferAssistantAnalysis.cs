@@ -22,11 +22,13 @@ namespace Hai.TransferAssistant
         public Dictionary<Type, int> DataTypeCounts;
         public Dictionary<Object, Deepview> AfterCullingDataDeepviews;
         public Dictionary<Type, int> AfterCullingTypeCounts;
+        public Dictionary<Object, List<Object>> AfterCullingSubassetManifest;
         public int TotalAfterCulling;
         private HashSet<string> _excludedTypeNames;
         private bool _includeEditorOnly;
         private bool _includeHiddenInPrefabs;
-        
+        private Dictionary<Object, Object> _subAssetToAssetMap;
+
         public event Action OnUpdate;
 
         public void DoPerformAnalysis(List<Object> targets, HashSet<string> afterCullingTypeFullNames, bool includeEditorOnly, bool includeHiddenInPrefabs)
@@ -44,6 +46,14 @@ namespace Hai.TransferAssistant
 
             DiscoverPrefabInstances();
             DiscoverThroughTraversal();
+            _subAssetToAssetMap = new Dictionary<Object, Object>();
+            foreach (var deepview in DataDeepviews.Values)
+            {
+                if (deepview.isAssetOnDisk && !deepview.isMainAsset)
+                {
+                    _subAssetToAssetMap[deepview.subject] = AssetDatabase.LoadAssetAtPath<Object>(deepview.path);
+                }
+            }
             UpdateCullingInternal();
         }
 
@@ -369,6 +379,22 @@ namespace Hai.TransferAssistant
                 if (current.isMainAsset)
                 {
                     TotalAfterCulling++;
+                }
+            }
+            
+            AfterCullingSubassetManifest = new Dictionary<Object, List<Object>>();
+            foreach (var deepview in AfterCullingDataDeepviews.Values)
+            {
+                if (_subAssetToAssetMap.TryGetValue(deepview.subject, out var mainAsset))
+                {
+                    if (!AfterCullingSubassetManifest.ContainsKey(mainAsset))
+                    {
+                        AfterCullingSubassetManifest[mainAsset] = new List<Object> { deepview.subject };
+                    }
+                    else
+                    {
+                        AfterCullingSubassetManifest[mainAsset].Add(deepview.subject);
+                    }
                 }
             }
             
