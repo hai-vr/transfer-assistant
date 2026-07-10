@@ -36,6 +36,7 @@
             "unknown_assets_and_dll_files": "未知資源和 DLL 檔案",
             "deselect_all": "取消全選",
             "deselect": "取消選擇",
+            "deselect_and_hide": "取消選擇並隱藏",
             "export_to_file": "匯出到檔案...",
             "quick_export": "快速匯出",
             "quick_export_tooltip": "匯出到名為 export.unitypackage 的檔案",

@@ -69,18 +69,18 @@ namespace Hai.TransferAssistant
             }
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.BeginVertical(GUILayout.Width(250));
+            EditorGUILayout.BeginVertical(GUILayout.Width(220));
             _sidebarScrollPos = EditorGUILayout.BeginScrollView(_sidebarScrollPos);
 
             var typeCounts = _treeView.GetTypeCounts();
             if (typeCounts.Length > 0)
             {
                 EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button(localize.Text(Phrases.select_all), EditorStyles.toolbarButton))
+                if (GUILayout.Button(localize.Text(Phrases.select_all)))
                 {
                     _treeView.SetAllSelected(true);
                 }
-                if (GUILayout.Button(localize.Text(Phrases.deselect_all), EditorStyles.toolbarButton))
+                if (GUILayout.Button(localize.Text(Phrases.deselect_all)))
                 {
                     _treeView.SetAllSelected(false);
                 }
@@ -91,22 +91,22 @@ namespace Hai.TransferAssistant
                 foreach (var typeCount in typeCounts)
                 {
                     var type = typeCount.Type;
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    EditorGUILayout.BeginVertical();
                     EditorGUILayout.LabelField($"{type.Name} ({typeCount.Count})");
                     EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button(localize.Text(Phrases.select), GUILayout.Width(60)))
+                    if (GUILayout.Button(localize.Text(Phrases.select)))
                     {
                         _treeView.SetTypeSelected(type, true);
                     }
-                    if (GUILayout.Button(localize.Text(Phrases.deselect), GUILayout.Width(70)))
+                    if (GUILayout.Button(localize.Text(Phrases.deselect)))
                     {
                         _treeView.SetTypeSelected(type, false);
                     }
-                    if (GUILayout.Button(localize.Text(Phrases.hide)))
+                    EditorGUILayout.EndHorizontal();
+                    if (GUILayout.Button(localize.Text(Phrases.deselect_and_hide)))
                     {
                         _treeView.SetTypeUnselectedAndRemoveType(type);
                     }
-                    EditorGUILayout.EndHorizontal();
                     EditorGUILayout.EndVertical();
                 }
             }

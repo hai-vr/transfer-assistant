@@ -36,6 +36,7 @@
             "unknown_assets_and_dll_files": "Assets et fichiers DLL inconnus",
             "deselect_all": "Tout désélectionner",
             "deselect": "Désélectionner",
+            "deselect_and_hide": "Désélectionner et masquer",
             "export_to_file": "Exporter vers un fichier...",
             "quick_export": "Export rapide",
             "quick_export_tooltip": "Exporter vers un fichier nommé export.unitypackage",

@@ -34,6 +34,7 @@ namespace Hai.TransferAssistant
         
         public const string deselect = nameof(deselect);
         public const string deselect_all = nameof(deselect_all);
+        public const string deselect_and_hide = nameof(deselect_and_hide);
         public const string dialog_ok_button = nameof(dialog_ok_button);
         public const string export_to_file = nameof(export_to_file);
         public const string quick_export = nameof(quick_export);

@@ -36,6 +36,7 @@
             "unknown_assets_and_dll_files": "不明なアセットおよびDLLファイル",
             "deselect_all": "すべて選択解除",
             "deselect": "選択解除",
+            "deselect_and_hide": "選択解除して非表示",
             "export_to_file": "ファイルにエクスポート...",
             "quick_export": "クイックエクスポート",
             "quick_export_tooltip": "export.unitypackage という名前のファイルにエクスポートします",
