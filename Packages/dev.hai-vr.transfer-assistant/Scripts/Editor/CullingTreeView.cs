@@ -28,6 +28,11 @@ namespace Hai.TransferAssistant
             showAlternatingRowBackgrounds = true;
         }
 
+        protected override void SelectionChanged(IList<int> selectedIds)
+        {
+            SetSelection(Array.Empty<int>(), TreeViewSelectionOptions.None);
+        }
+
         public void SetData(List<Type> nonComponents, List<TransferAssistantWindow.ComponentGroup> componentGroups)
         {
             _cachedNonComponents = nonComponents;
