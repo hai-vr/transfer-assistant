@@ -7,6 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
+            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
             "analysis_in_progress": "分析中...",
             "culled_suffix": " (已剔除 {0})",
             "msg_checkboxes_affect_export": "下方的复选框将影响哪些资源被导出。",
@@ -21,6 +22,7 @@
             "prefab_model": "Prefab 模型",
             "prepare_export_assets": "准备导出... ({0} 个资源)",
             "reset_to_defaults": "重置为默认值",
+            "reset_to_defaults_confirm": "确定吗？",
             "search": "搜索",
             "target": "目标",
             "targets": "目标",
@@ -34,7 +36,9 @@
             "unknown_assets_and_dll_files": "未知资源和 DLL 文件",
             "deselect_all": "取消全选",
             "deselect": "取消选择",
-            "export_selected": "导出所选内容",
+            "export_to_file": "导出到文件...",
+            "quick_export": "快速导出",
+            "quick_export_tooltip": "导出到名为 export.unitypackage 的文件",
             "filtering": "过滤",
             "hide": "隐藏",
             "msg_no_assets_selected": "未选择任何资源。",

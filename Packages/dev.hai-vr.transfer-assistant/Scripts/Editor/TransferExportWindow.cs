@@ -130,7 +130,26 @@ namespace Hai.TransferAssistant
             var rect = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
             _treeView.OnGUI(rect);
 
-            if (GUILayout.Button(localize.Text(Phrases.export_selected)))
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(localize.Text(Phrases.export_to_file)))
+            {
+                var selectedPaths = _treeView.GetSelectedPaths();
+                if (selectedPaths.Length > 0)
+                {
+                    var path = EditorUtility.SaveFilePanel(localize.Text(Phrases.export_to_file), "", "", "unitypackage");
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        AssetDatabase.ExportPackage(selectedPaths, path, ExportPackageOptions.Interactive);
+                    }
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog(localize.Text(Phrases.window_title), localize.Text(Phrases.msg_no_assets_selected), localize.Text(Phrases.dialog_ok_button));
+                }
+            }
+            var quickExportContent = new GUIContent(localize.Text(Phrases.quick_export), localize.Text(Phrases.quick_export_tooltip));
+            var quickExportWidth = GUI.skin.button.CalcSize(quickExportContent).x;
+            if (GUILayout.Button(quickExportContent, GUILayout.Width(quickExportWidth + 20)))
             {
                 var selectedPaths = _treeView.GetSelectedPaths();
                 if (selectedPaths.Length > 0)
@@ -142,6 +161,7 @@ namespace Hai.TransferAssistant
                     EditorUtility.DisplayDialog(localize.Text(Phrases.window_title), localize.Text(Phrases.msg_no_assets_selected), localize.Text(Phrases.dialog_ok_button));
                 }
             }
+            EditorGUILayout.EndHorizontal();
 
             localize.Selector(() => _localize = NewLoc());
             

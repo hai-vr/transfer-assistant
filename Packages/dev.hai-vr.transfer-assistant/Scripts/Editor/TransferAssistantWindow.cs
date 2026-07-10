@@ -56,6 +56,8 @@ namespace Hai.TransferAssistant
         private List<Type> _cachedNonComponents = new();
         private List<ComponentGroup> _cachedComponentGroups = new();
         private VisualizeTreeBuilder _visualizeTreeBuilder;
+        private bool _resetToDefaultsConfirming;
+        private double _resetToDefaultsExpireTime;
 
         internal struct ComponentGroup
         {
@@ -189,6 +191,19 @@ namespace Hai.TransferAssistant
             {
                 SavePrefs();
             }
+            if (GUILayout.Button(EditorGUIUtility.IconContent("_Help"), EditorStyles.label, GUILayout.Width(20), GUILayout.Height(20)))
+            {
+                // We sanitize this and hardcode this, just in case there might be a misformed localization file.
+                var documentationUrl__unsafe = localize.Text(Phrases.documentation_url);
+                if (documentationUrl__unsafe.StartsWith("https://docs.hai-vr.dev/"))
+                {
+                    Application.OpenURL(documentationUrl__unsafe);
+                }
+                else
+                {
+                    Application.OpenURL("https://docs.hai-vr.dev/docs/products/transfer-assistant");
+                }
+            }
             EditorGUILayout.EndHorizontal();
 
             var invalid = _targetMode switch
@@ -312,17 +327,38 @@ namespace Hai.TransferAssistant
 
         private void LayoutResetToDefaults()
         {
-            if (GUILayout.Button(localize.Text(Phrases.reset_to_defaults)))
+            var isConfirming = _resetToDefaultsConfirming && EditorApplication.timeSinceStartup < _resetToDefaultsExpireTime;
+            if (isConfirming)
             {
-                _afterCullingTypeFullNames.Clear();
-                _afterCullingTypeFullNames.UnionWith(AfterCullingTypeFullNamesDefault);
-                _includeEditorOnly = true;
-                _includeHiddenInPrefabs = false;
-                SavePrefs();
-                ScheduleAnalysis();
-
-                _cullingTreeView.SetData(_cachedNonComponents, _cachedComponentGroups);
+                ColoredBackgroundVoid(true, Color.red, () =>
+                {
+                    if (GUILayout.Button(localize.Text(Phrases.reset_to_defaults_confirm)))
+                    {
+                        DoResetToDefaults();
+                        _resetToDefaultsConfirming = false;
+                    }
+                });
             }
+            else
+            {
+                if (GUILayout.Button(localize.Text(Phrases.reset_to_defaults)))
+                {
+                    _resetToDefaultsConfirming = true;
+                    _resetToDefaultsExpireTime = EditorApplication.timeSinceStartup + 5.0f;
+                }
+            }
+        }
+
+        private void DoResetToDefaults()
+        {
+            _afterCullingTypeFullNames.Clear();
+            _afterCullingTypeFullNames.UnionWith(AfterCullingTypeFullNamesDefault);
+            _includeEditorOnly = true;
+            _includeHiddenInPrefabs = false;
+            SavePrefs();
+            ScheduleAnalysis();
+
+            _cullingTreeView.SetData(_cachedNonComponents, _cachedComponentGroups);
         }
 
         private void LayoutMainPane()

@@ -3,6 +3,8 @@ namespace Hai.TransferAssistant
 {
     internal class Phrases
     {
+        public const string documentation_url = nameof(documentation_url);
+        
         public const string analysis_in_progress = nameof(analysis_in_progress);
         public const string culled_suffix = nameof(culled_suffix);
         public const string msg_checkboxes_affect_export = nameof(msg_checkboxes_affect_export);
@@ -17,6 +19,7 @@ namespace Hai.TransferAssistant
         public const string prefab_model = nameof(prefab_model);
         public const string prepare_export_assets = nameof(prepare_export_assets);
         public const string reset_to_defaults = nameof(reset_to_defaults);
+        public const string reset_to_defaults_confirm = nameof(reset_to_defaults_confirm);
         public const string search = nameof(search);
         public const string target = nameof(target);
         public const string targets = nameof(targets);
@@ -32,7 +35,9 @@ namespace Hai.TransferAssistant
         public const string deselect = nameof(deselect);
         public const string deselect_all = nameof(deselect_all);
         public const string dialog_ok_button = nameof(dialog_ok_button);
-        public const string export_selected = nameof(export_selected);
+        public const string export_to_file = nameof(export_to_file);
+        public const string quick_export = nameof(quick_export);
+        public const string quick_export_tooltip = nameof(quick_export_tooltip);
         public const string filtering = nameof(filtering);
         public const string hide = nameof(hide);
         public const string msg_no_assets_selected = nameof(msg_no_assets_selected);

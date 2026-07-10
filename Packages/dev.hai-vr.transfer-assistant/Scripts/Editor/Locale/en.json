@@ -7,6 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
+            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
             "analysis_in_progress": "Analysis in progress...",
             "culled_suffix": " ({0} culled)",
             "msg_checkboxes_affect_export": "These checkboxes below will affect which assets are exported.",
@@ -21,6 +22,7 @@
             "prefab_model": "Prefab Model",
             "prepare_export_assets": "Prepare Export... ({0} assets)",
             "reset_to_defaults": "Reset to defaults",
+            "reset_to_defaults_confirm": "Are you sure?",
             "search": "Search",
             "target": "Target",
             "targets": "Targets",
@@ -34,7 +36,9 @@
             "unknown_assets_and_dll_files": "Unknown assets and DLL Files",
             "deselect_all": "Deselect All",
             "deselect": "Deselect",
-            "export_selected": "Export Selected",
+            "export_to_file": "Export to file...",
+            "quick_export": "Quick export",
+            "quick_export_tooltip": "Export to a file called export.unitypackage",
             "filtering": "Filtering",
             "hide": "Hide",
             "msg_no_assets_selected": "No assets selected.",

@@ -7,6 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
+            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
             "analysis_in_progress": "分析中...",
             "culled_suffix": " ({0} 個除外)",
             "msg_checkboxes_affect_export": "以下のチェックボックスは、どのアセットがエクスポートされるかに影響します。",
@@ -21,6 +22,7 @@
             "prefab_model": "プレハブモデル",
             "prepare_export_assets": "エクスポートの準備... ({0} 個のアセット)",
             "reset_to_defaults": "デフォルトにリセット",
+            "reset_to_defaults_confirm": "本当にいいですか？",
             "search": "検索",
             "target": "ターゲット",
             "targets": "ターゲット",
@@ -34,7 +36,9 @@
             "unknown_assets_and_dll_files": "不明なアセットおよびDLLファイル",
             "deselect_all": "すべて選択解除",
             "deselect": "選択解除",
-            "export_selected": "選択項目をエクスポート",
+            "export_to_file": "ファイルにエクスポート...",
+            "quick_export": "クイックエクスポート",
+            "quick_export_tooltip": "export.unitypackage という名前のファイルにエクスポートします",
             "filtering": "フィルタリング",
             "hide": "非表示",
             "msg_no_assets_selected": "アセットが選択されていません。",
