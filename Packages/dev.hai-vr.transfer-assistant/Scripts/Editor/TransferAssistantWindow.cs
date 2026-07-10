@@ -403,6 +403,19 @@ namespace Hai.TransferAssistant
                 {
                     searchObject = searchObject == obj ? null : obj;
                 };
+                _visualizeTreeBuilder.OnSearchStringRequested = s =>
+                {
+                    if (searchObject != null)
+                    {
+                        search = s;
+                        searchObject = null;
+                    }
+                    else
+                    {
+                        search = search == s ? "" : s;
+                        searchObject = null;
+                    }
+                };
                 _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
                 _analysis.OnUpdate += () => _visualizeTreeBuilder.WhenAnalysisUpdated(_analysis);
             }

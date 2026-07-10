@@ -15,6 +15,7 @@ namespace Hai.TransferAssistant
         private TreeViewState _treeViewState;
         private DependencyTreeView _treeView;
         public Action<Object> OnSearchObjectRequested;
+        public Action<string> OnSearchStringRequested;
         private bool _expandDependencies = true;
         private bool _expandTypes = true;
         private bool _expandAssetsContainingOthers = true;
@@ -46,6 +47,7 @@ namespace Hai.TransferAssistant
                 _treeViewState ??= new TreeViewState();
                 _treeView = new DependencyTreeView(_treeViewState, _analysis, _localize);
                 _treeView.OnSearchObjectRequested = obj => OnSearchObjectRequested?.Invoke(obj);
+                _treeView.OnSearchStringRequested = s => OnSearchStringRequested?.Invoke(s);
                 _treeView.Reload();
                 _treeView.ExpandAll();
                 if (!_expandDependencies) _treeView.SetExpanded(DependencyTreeView.DependenciesId, false);
@@ -82,6 +84,7 @@ namespace Hai.TransferAssistant
         private Object _customSearchObject;
 
         public Action<Object> OnSearchObjectRequested;
+        public Action<string> OnSearchStringRequested;
         private readonly Texture _searchIcon = EditorGUIUtility.IconContent(TransferAssistantWindow.SearchIconContent).image;
 
         public string CustomSearchString
@@ -124,7 +127,7 @@ namespace Hai.TransferAssistant
 
             var idCounter = FirstDynamicId;
 
-            var dependenciesItem = new DependencyTreeViewItem(DependenciesId, 0, _localize.Text(Phrases.dependencies), null, true, false);
+            var dependenciesItem = new DependencyTreeViewItem(DependenciesId, 0, _localize.Text(Phrases.dependencies), (Object)null, true, false);
             allItems.Add(dependenciesItem);
             
             var visited = new HashSet<Object>();
@@ -136,7 +139,7 @@ namespace Hai.TransferAssistant
                 }
             }
 
-            var typesItem = new DependencyTreeViewItem(TypesId, 0, _localize.Text(Phrases.types), null, true, false);
+            var typesItem = new DependencyTreeViewItem(TypesId, 0, _localize.Text(Phrases.types), (Object)null, true, false);
             allItems.Add(typesItem);
 
             var assetsByType = _analysis.AfterCullingDataDeepviews.Keys
@@ -147,7 +150,7 @@ namespace Hai.TransferAssistant
 
             foreach (var group in assetsByType)
             {
-                var typeItem = new DependencyTreeViewItem(idCounter++, 1, group.Key.Name, null, true, false);
+                var typeItem = new DependencyTreeViewItem(idCounter++, 1, group.Key.Name, (Type)group.Key, true, false);
                 allItems.Add(typeItem);
 
                 var sortedAssets = group.OrderBy(obj => obj.name, StringComparer.InvariantCulture);
@@ -158,7 +161,7 @@ namespace Hai.TransferAssistant
                 }
             }
 
-            var assetsContainingOthersItem = new DependencyTreeViewItem(AssetsContainingOthersId, 0, _localize.Text(Phrases.assets_containing_other_assets), null, true, false);
+            var assetsContainingOthersItem = new DependencyTreeViewItem(AssetsContainingOthersId, 0, _localize.Text(Phrases.assets_containing_other_assets), (Object)null, true, false);
             allItems.Add(assetsContainingOthersItem);
 
             var subassetManifest = _analysis.AfterCullingSubassetManifest
@@ -331,6 +334,18 @@ namespace Hai.TransferAssistant
                 var labelRect = rect;
                 labelRect.x += indent;
                 labelRect.width -= indent;
+
+                if (item.Type != null)
+                {
+                    var buttonWidth = 25;
+                    labelRect.width -= buttonWidth + 4;
+                    var buttonRect = new Rect(labelRect.xMax + 4, labelRect.y, buttonWidth, labelRect.height);
+                    if (GUI.Button(buttonRect, _searchIcon, EditorStyles.miniButton))
+                    {
+                        OnSearchStringRequested?.Invoke("t:" + item.Type.FullName);
+                    }
+                }
+
                 EditorGUI.LabelField(labelRect, item.displayName, EditorStyles.boldLabel);
                 return;
             }
@@ -421,12 +436,20 @@ namespace Hai.TransferAssistant
     internal class DependencyTreeViewItem : TreeViewItem
     {
         public Object Target { get; }
+        public Type Type { get; }
         public bool HasDependencies { get; }
         public bool AlreadyVisited { get; }
 
         public DependencyTreeViewItem(int id, int depth, string displayName, Object target, bool hasDependencies, bool alreadyVisited) : base(id, depth, displayName)
         {
             Target = target;
+            HasDependencies = hasDependencies;
+            AlreadyVisited = alreadyVisited;
+        }
+
+        public DependencyTreeViewItem(int id, int depth, string displayName, Type type, bool hasDependencies, bool alreadyVisited) : base(id, depth, displayName)
+        {
+            Type = type;
             HasDependencies = hasDependencies;
             AlreadyVisited = alreadyVisited;
         }
