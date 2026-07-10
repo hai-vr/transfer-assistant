@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -22,6 +23,7 @@ namespace Hai.TransferAssistant
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
         private const float SidebarWidth = 250;
+        internal const string SearchIconContent = "Search Icon";
 
         public Object target;
         public Object[] targets = Array.Empty<Object>();
@@ -47,13 +49,15 @@ namespace Hai.TransferAssistant
         private TransferAssistantAnalysis _analysis;
         
         private Vector2 _sidebarScrollPos;
+        private TreeViewState _cullingTreeViewState;
+        private CullingTreeView _cullingTreeView;
 
         private List<Type> _cachedComponents = new();
         private List<Type> _cachedNonComponents = new();
         private List<ComponentGroup> _cachedComponentGroups = new();
         private VisualizeTreeBuilder _visualizeTreeBuilder;
 
-        private struct ComponentGroup
+        internal struct ComponentGroup
         {
             public string Key;
             public List<Type> Types;
@@ -94,6 +98,20 @@ namespace Hai.TransferAssistant
             {
                 _includeHiddenInPrefabs = EditorPrefs.GetBool(IncludeHiddenInPrefabsPrefsKey, false);
             }
+
+            _cullingTreeViewState = new TreeViewState();
+            _cullingTreeView = new CullingTreeView(_cullingTreeViewState, _analysis, localize, _afterCullingTypeFullNames, () =>
+            {
+                _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
+                SavePrefs();
+                Repaint();
+            }, ttype =>
+            {
+                var searchTerm = "t:" + ttype.FullName;
+                search = search == searchTerm ? "" : searchTerm;
+                searchObject = null;
+                Repaint();
+            });
         }
 
         private void SavePrefs()
@@ -217,10 +235,10 @@ namespace Hai.TransferAssistant
         private void LayoutSidebar(bool isAnalysisPossible)
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(SidebarWidth));
-            _sidebarScrollPos = EditorGUILayout.BeginScrollView(_sidebarScrollPos);
             
             if (_analysis.DataPrefabObjectToInstances != null)
             {
+                _sidebarScrollPos = EditorGUILayout.BeginScrollView(_sidebarScrollPos, GUILayout.Width(SidebarWidth));
                 localize.LabelField(Phrases.export, EditorStyles.boldLabel);
                 var total = _analysis.TotalAfterCulling;
                 EditorGUI.BeginDisabledGroup(total == 0);
@@ -243,17 +261,6 @@ namespace Hai.TransferAssistant
                 {
                     localize.HelpBox(Phrases.msg_checkboxes_affect_export, MessageType.None);
                     
-                    if (_cachedNonComponents.Count > 0)
-                    {
-                        localize.LabelField(Phrases.culling, EditorStyles.boldLabel);
-                        foreach (var ttype in _cachedNonComponents)
-                        {
-                            LayoutTypeToggle(ttype);
-                        }
-                        LayoutResetToDefaults();
-                        EditorGUILayout.Space();
-                    }
-                    
                     localize.LabelField(Phrases.options, EditorStyles.boldLabel);
                     EditorGUI.BeginChangeCheck();
                     _includeEditorOnly = EditorGUILayout.ToggleLeft(localize.Text(Phrases.include_editor_only), _includeEditorOnly);
@@ -273,66 +280,15 @@ namespace Hai.TransferAssistant
                     }
                     EditorGUI.EndDisabledGroup();
                     EditorGUILayout.Space();
+                    
+                    LayoutResetToDefaults();
+                    EditorGUILayout.Space();
 
-                    if (_cachedComponents.Count > 0)
-                    {
-                        localize.LabelField(Phrases.components, EditorStyles.boldLabel);
-
-                        foreach (var group in _cachedComponentGroups)
-                        {
-                            if (group.Key == "")
-                            {
-                                foreach (var ttype in group.Types)
-                                {
-                                    LayoutTypeToggle(ttype);
-                                }
-                            }
-                            else
-                            {
-                                var groupList = group.Types;
-                                var allIncluded = groupList.All(ttype => !_afterCullingTypeFullNames.Contains(ttype.FullName));
-                                var noneIncluded = groupList.All(ttype => _afterCullingTypeFullNames.Contains(ttype.FullName));
-
-                                EditorGUI.BeginChangeCheck();
-                                EditorGUI.showMixedValue = !allIncluded && !noneIncluded;
-                                var newState = EditorGUILayout.ToggleLeft(group.Key, allIncluded, EditorStyles.boldLabel);
-                                EditorGUI.showMixedValue = false;
-                                if (EditorGUI.EndChangeCheck())
-                                {
-                                    foreach (var ttype in groupList)
-                                    {
-                                        if (newState)
-                                        {
-                                            _afterCullingTypeFullNames.Remove(ttype.FullName);
-                                        }
-                                        else
-                                        {
-                                            _afterCullingTypeFullNames.Add(ttype.FullName);
-                                        }
-                                    }
-                                    _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
-                                    SavePrefs();
-                                }
-
-                                EditorGUI.indentLevel++;
-                                foreach (var ttype in groupList)
-                                {
-                                    LayoutTypeToggle(ttype);
-                                }
-                                EditorGUI.indentLevel--;
-                            }
-                        }
-                        EditorGUILayout.Space();
-                    }
-
-                    if (_cachedNonComponents.Count == 0)
-                    {
-                        LayoutResetToDefaults();
-                    }
+                    _cullingTreeView.OnGUI(EditorGUILayout.GetControlRect(false, GUILayout.ExpandHeight(true), GUILayout.MinHeight(400)));
                 }
+                EditorGUILayout.EndScrollView();
             }
             
-            EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
         }
 
@@ -364,6 +320,8 @@ namespace Hai.TransferAssistant
                 _includeHiddenInPrefabs = false;
                 SavePrefs();
                 ScheduleAnalysis();
+
+                _cullingTreeView.SetData(_cachedNonComponents, _cachedComponentGroups);
             }
         }
 
@@ -398,51 +356,6 @@ namespace Hai.TransferAssistant
             EditorGUILayout.EndVertical();
         }
 
-        private void LayoutTypeToggle(Type ttype)
-        {
-            var count = _analysis.DataTypeCounts[ttype];
-            var culledCount = _analysis.AfterCullingTypeCounts != null && _analysis.AfterCullingTypeCounts.TryGetValue(ttype, out var c) ? c : 0;
-            var isCulled = _afterCullingTypeFullNames.Contains(ttype.FullName);
-            var friendlyTypeName = ttype.Name == TransferAssistantAnalysis.UnknownAssetAndDLLTypeName ? localize.Text(Phrases.unknown_assets_and_dll_files) : ttype.Name;
-
-            var isComponentOrStateMachineBehaviour = TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(ttype);
-            var label = isComponentOrStateMachineBehaviour ? friendlyTypeName : $"{friendlyTypeName} ({culledCount} / {count})";
-            if (!isComponentOrStateMachineBehaviour && culledCount < count && culledCount != 0)
-            {
-                label += localize.Format(Phrases.culled_suffix, count - culledCount);
-            }
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
-            var newState = EditorGUILayout.ToggleLeft(label, !isCulled);
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (newState)
-                {
-                    if (_afterCullingTypeFullNames.Remove(ttype.FullName))
-                    {
-                        _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
-                        SavePrefs();
-                    }
-                }
-                else
-                {
-                    if (_afterCullingTypeFullNames.Add(ttype.FullName))
-                    {
-                        _analysis.UpdateCulledCache(_afterCullingTypeFullNames);
-                        SavePrefs();
-                    }
-                }
-            }
-            _searchIcon ??= EditorGUIUtility.IconContent("Search Icon").image;
-            if (GUILayout.Button(_searchIcon, GUILayout.Width(25), GUILayout.Height(EditorGUIUtility.singleLineHeight)))
-            {
-                var searchTerm = "t:" + ttype.FullName;
-                search = search == searchTerm ? "" : searchTerm;
-                searchObject = null;
-            }
-            EditorGUILayout.EndHorizontal();
-        }
 
         private void LayoutVisualizeTree()
         {
@@ -552,6 +465,8 @@ namespace Hai.TransferAssistant
                 .OrderBy(g => g.Key, StringComparer.InvariantCulture)
                 .Select(g => new ComponentGroup { Key = g.Key, Types = g.ToList() })
                 .ToList();
+
+            _cullingTreeView.SetData(_cachedNonComponents, _cachedComponentGroups);
         }
 
         internal static void ColoredBackgroundVoid(bool isActive, Color bgColor, Action inside)

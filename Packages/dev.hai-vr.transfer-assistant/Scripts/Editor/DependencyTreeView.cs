@@ -82,7 +82,7 @@ namespace Hai.TransferAssistant
         private Object _customSearchObject;
 
         public Action<Object> OnSearchObjectRequested;
-        private readonly Texture _searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
+        private readonly Texture _searchIcon = EditorGUIUtility.IconContent(TransferAssistantWindow.SearchIconContent).image;
 
         public string CustomSearchString
         {

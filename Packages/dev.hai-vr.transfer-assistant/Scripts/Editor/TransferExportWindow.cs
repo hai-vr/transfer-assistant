@@ -162,7 +162,7 @@ namespace Hai.TransferAssistant
         private TypeCount[] _cachedTypeCounts;
         private int _nextId = 1;
         private string[] _assetPaths;
-        private readonly Texture _searchIcon = EditorGUIUtility.IconContent("Search Icon").image;
+        private readonly Texture _searchIcon = EditorGUIUtility.IconContent(TransferAssistantWindow.SearchIconContent).image;
 
         public struct TypeCount
         {
