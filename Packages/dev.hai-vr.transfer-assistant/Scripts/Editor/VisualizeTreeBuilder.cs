@@ -132,6 +132,7 @@ namespace Hai.TransferAssistant
             var assetsByType = _analysis.AfterCullingDataDeepviews.Keys
                 .Where(obj => obj != null)
                 .GroupBy(obj => obj.GetType())
+                .Where(group => !TransferAssistantAnalysis.IsComponentOrStateMachineBehaviour(group.Key))
                 .OrderBy(group => group.Key.Name, StringComparer.InvariantCulture);
 
             foreach (var group in assetsByType)
