@@ -15,6 +15,9 @@ namespace Hai.TransferAssistant
         private TreeViewState _treeViewState;
         private DependencyTreeView _treeView;
         public Action<Object> OnSearchObjectRequested;
+        private bool _expandDependencies = true;
+        private bool _expandTypes = true;
+        private bool _expandAssetsContainingOthers = true;
 
         public VisualizeTreeBuilder(HaiEFLoc localize)
         {
@@ -23,6 +26,13 @@ namespace Hai.TransferAssistant
 
         public void WhenAnalysisUpdated(TransferAssistantAnalysis analysis)
         {
+            if (_treeViewState != null)
+            {
+                var expandedIDs = new HashSet<int>(_treeViewState.expandedIDs);
+                _expandDependencies = expandedIDs.Contains(DependencyTreeView.DependenciesId);
+                _expandTypes = expandedIDs.Contains(DependencyTreeView.TypesId);
+                _expandAssetsContainingOthers = expandedIDs.Contains(DependencyTreeView.AssetsContainingOthersId);
+            }
             _analysis = analysis;
             _treeView = null;
         }
@@ -38,6 +48,9 @@ namespace Hai.TransferAssistant
                 _treeView.OnSearchObjectRequested = obj => OnSearchObjectRequested?.Invoke(obj);
                 _treeView.Reload();
                 _treeView.ExpandAll();
+                if (!_expandDependencies) _treeView.SetExpanded(DependencyTreeView.DependenciesId, false);
+                if (!_expandTypes) _treeView.SetExpanded(DependencyTreeView.TypesId, false);
+                if (!_expandAssetsContainingOthers) _treeView.SetExpanded(DependencyTreeView.AssetsContainingOthersId, false);
             }
 
             if (_treeView.CustomSearchString != searchString)
@@ -58,6 +71,11 @@ namespace Hai.TransferAssistant
     internal class DependencyTreeView : TreeView
     {
         private const string EditorOnlyLabel = "EditorOnly";
+        internal const int DependenciesId = 1;
+        internal const int TypesId = 2;
+        internal const int AssetsContainingOthersId = 3;
+        private const int FirstDynamicId = 100;
+
         private readonly TransferAssistantAnalysis _analysis;
         private readonly HaiEFLoc _localize;
         private string _customSearchString;
@@ -75,10 +93,6 @@ namespace Hai.TransferAssistant
                 {
                     _customSearchString = value;
                     Reload();
-                    if (!string.IsNullOrEmpty(_customSearchString) || _customSearchObject != null)
-                    {
-                        ExpandAll();
-                    }
                 }
             }
         }
@@ -112,9 +126,9 @@ namespace Hai.TransferAssistant
             var root = new TreeViewItem { id = 0, depth = -1, displayName = "Root" };
             var allItems = new List<TreeViewItem>();
 
-            var idCounter = 1;
+            var idCounter = FirstDynamicId;
 
-            var dependenciesItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.dependencies), null, true, false);
+            var dependenciesItem = new DependencyTreeViewItem(DependenciesId, 0, _localize.Text(Phrases.dependencies), null, true, false);
             allItems.Add(dependenciesItem);
             
             var visited = new HashSet<Object>();
@@ -126,7 +140,7 @@ namespace Hai.TransferAssistant
                 }
             }
 
-            var typesItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.types), null, true, false);
+            var typesItem = new DependencyTreeViewItem(TypesId, 0, _localize.Text(Phrases.types), null, true, false);
             allItems.Add(typesItem);
 
             var assetsByType = _analysis.AfterCullingDataDeepviews.Keys
@@ -148,7 +162,7 @@ namespace Hai.TransferAssistant
                 }
             }
 
-            var assetsContainingOthersItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.assets_containing_other_assets), null, true, false);
+            var assetsContainingOthersItem = new DependencyTreeViewItem(AssetsContainingOthersId, 0, _localize.Text(Phrases.assets_containing_other_assets), null, true, false);
             allItems.Add(assetsContainingOthersItem);
 
             var subassetManifest = _analysis.AfterCullingSubassetManifest
