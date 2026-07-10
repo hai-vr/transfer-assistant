@@ -22,7 +22,7 @@ namespace Hai.TransferAssistant
         private const string IncludeHiddenInPrefabsPrefsKey = PrefsPrefix + "IncludeHiddenInPrefabs";
         private const string TargetModePrefsKey = PrefsPrefix + "TargetMode";
         private const string ShortTitleName = "Transfer Assistant";
-        private const float SidebarWidth = 250;
+        private const float SidebarWidth = 300;
         internal const string SearchIconContent = "Search Icon";
 
         public Object target;
