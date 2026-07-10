@@ -56,7 +56,8 @@
             "already_shown": "(表示済み)",
             "prefab_instance": "Prefab インスタンス",
             "dependencies": "依存関係",
-            "types": "型"
+            "types": "型",
+            "assets_containing_other_assets": "他のアセットを含むアセット"
         },
         "enums": {
         }

@@ -56,7 +56,8 @@
             "already_shown": "(已显示)",
             "prefab_instance": "Prefab 实例",
             "dependencies": "依赖关系",
-            "types": "类型"
+            "types": "类型",
+            "assets_containing_other_assets": "包含其他资源的资源"
         },
         "enums": {
         }

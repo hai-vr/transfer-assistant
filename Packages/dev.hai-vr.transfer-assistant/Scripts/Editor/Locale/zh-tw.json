@@ -56,7 +56,8 @@
             "already_shown": "(已顯示)",
             "prefab_instance": "Prefab 實例",
             "dependencies": "依賴關係",
-            "types": "類型"
+            "types": "類型",
+            "assets_containing_other_assets": "包含其他資源的資源"
         },
         "enums": {
         }

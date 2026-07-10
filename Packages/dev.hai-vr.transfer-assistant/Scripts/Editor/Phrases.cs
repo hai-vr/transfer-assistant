@@ -53,6 +53,7 @@ namespace Hai.TransferAssistant
         public const string reason_IsComponent = nameof(reason_IsComponent);
         public const string dependencies = nameof(dependencies);
         public const string types = nameof(types);
+        public const string assets_containing_other_assets = nameof(assets_containing_other_assets);
         public const string already_shown = nameof(already_shown);
         public const string prefab_instance = nameof(prefab_instance);
     }

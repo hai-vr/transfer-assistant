@@ -397,6 +397,10 @@ namespace Hai.TransferAssistant
                     }
                 }
             }
+            foreach (var values in AfterCullingSubassetManifest.Values)
+            {
+                values.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.InvariantCulture));
+            }
             
             OnUpdate?.Invoke();
         }

@@ -56,7 +56,8 @@
             "already_shown": "(Déjà affiché)",
             "prefab_instance": "Instance du Prefab",
             "dependencies": "Dépendances",
-            "types": "Types"
+            "types": "Types",
+            "assets_containing_other_assets": "Assets contenant d'autres assets"
         },
         "enums": {
         }

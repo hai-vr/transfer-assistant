@@ -147,6 +147,27 @@ namespace Hai.TransferAssistant
                 }
             }
 
+            var assetsContainingOthersItem = new DependencyTreeViewItem(idCounter++, 0, _localize.Text(Phrases.assets_containing_other_assets), null, true, false);
+            allItems.Add(assetsContainingOthersItem);
+
+            var subassetManifest = _analysis.AfterCullingSubassetManifest
+                .OrderBy(pair => pair.Key.name, StringComparer.InvariantCulture);
+
+            foreach (var pair in subassetManifest)
+            {
+                var parentAsset = pair.Key;
+                var subAssets = pair.Value;
+
+                var parentItem = new DependencyTreeViewItem(idCounter++, 1, parentAsset.name, parentAsset, subAssets.Count > 0, false);
+                allItems.Add(parentItem);
+
+                foreach (var subAsset in subAssets.OrderBy(obj => obj.name, StringComparer.InvariantCulture))
+                {
+                    var subItem = new DependencyTreeViewItem(idCounter++, 2, subAsset.name, subAsset, false, false);
+                    allItems.Add(subItem);
+                }
+            }
+
             SetupParentsAndChildrenFromDepths(root, allItems);
             return root;
         }

@@ -56,7 +56,8 @@
             "already_shown": "(이미 표시됨)",
             "prefab_instance": "프리팹 인스턴스",
             "dependencies": "의존성",
-            "types": "타입"
+            "types": "타입",
+            "assets_containing_other_assets": "다른 에셋을 포함하는 에셋"
         },
         "enums": {
         }
