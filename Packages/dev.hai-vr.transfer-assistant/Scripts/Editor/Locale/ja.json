@@ -7,7 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
-            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant/ja",
+            "documentation_url": "https://docs.hai-vr.dev/ja/docs/products/transfer-assistant",
             "analysis_in_progress": "分析中...",
             "culled_suffix": " ({0} 個除外)",
             "msg_checkboxes_affect_export": "以下のチェックボックスは、どのアセットがエクスポートされるかに影響します。",

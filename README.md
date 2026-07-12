@@ -35,7 +35,7 @@ Some functionality of this tool may be used for introspection purposes, but it i
 ## User manual
 
 The documentation for this tool is being written, and it will be available [here in English](https://docs.hai-vr.dev/docs/products/transfer-assistant),
-and [here in Japanese](https://docs.hai-vr.dev/docs/products/transfer-assistant/ja).
+and [here in Japanese](https://docs.hai-vr.dev/ja/docs/products/transfer-assistant).
 
 -----
 
