@@ -3,7 +3,7 @@
   "displayName": "Haï ~ Transfer Assistant",
   "version": "1.0.0-beta.1",
   "unity": "2019.4",
-  "description": "Transfer assets from one project to another project while culling unnecessary assets. Designed primarily to assist in the migration of custom avatars between incompatible social VR applications.",
+  "description": "Transfer assets from one project to another project while stripping unnecessary assets. Designed primarily to assist in the migration of custom avatars between incompatible social VR applications.",
   "author" : {
     "name" : "Haï~"
   },
