@@ -7,7 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
-            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
+            "documentation_url": "https://docs.hai-vr.dev/zh-Hans/docs/products/transfer-assistant",
             "analysis_in_progress": "分析中...",
             "culled_suffix": " (已剔除 {0})",
             "msg_checkboxes_affect_export": "下方的复选框将影响哪些资源被导出。",

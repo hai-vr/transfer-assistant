@@ -7,7 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
-            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
+            "documentation_url": "https://docs.hai-vr.dev/fr/docs/products/transfer-assistant",
             "analysis_in_progress": "Analyse en cours...",
             "culled_suffix": " ({0} élagués)",
             "msg_checkboxes_affect_export": "Les cases à cocher ci-dessous affecteront les actifs exportés.",

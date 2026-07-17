@@ -7,7 +7,7 @@
     },
     "dev.hai-vr.transfer-assistant": {
         "phrases": {
-            "documentation_url": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
+            "documentation_url": "https://docs.hai-vr.dev/ko/docs/products/transfer-assistant",
             "analysis_in_progress": "분석 진행 중...",
             "culled_suffix": " ({0}개 솎아냄)",
             "msg_checkboxes_affect_export": "아래의 체크박스는 어떤 에셋이 내보내질지에 영향을 미칩니다.",
