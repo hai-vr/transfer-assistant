@@ -16,8 +16,8 @@ namespace Hai.TransferAssistant
         private TreeViewState _treeViewState;
         private DependencyTreeView _treeView;
         private bool _expandDependencies = true;
-        private bool _expandTypes = true;
-        private bool _expandAssetsContainingOthers = true;
+        private bool _expandTypes = false;
+        private bool _expandAssetsContainingOthers = false;
 
         public VisualizeTreeBuilder(HaiEFLoc localize, TransferAssistantWindow window)
         {
