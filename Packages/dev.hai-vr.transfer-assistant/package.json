@@ -1,16 +1,14 @@
 {
   "name": "dev.hai-vr.transfer-assistant",
   "displayName": "Haï ~ Transfer Assistant",
-  "version": "1.0.0-beta.2",
-  "unity": "2019.4",
+  "version": "1.0.0",
+  "unity": "2022.3",
   "description": "Transfer assets from one project to another project while stripping unnecessary assets. Designed primarily to assist in the migration of custom avatars between incompatible social VR applications.",
   "author" : {
     "name" : "Haï~"
   },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.2.1"
-  },
-  "vpmDependencies": {
   },
   "url" : "https://docs.hai-vr.dev/docs/products/transfer-assistant",
   "documentationUrl": "https://docs.hai-vr.dev/docs/products/transfer-assistant",
